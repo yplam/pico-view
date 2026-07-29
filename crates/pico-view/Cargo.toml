@@ -1,0 +1,21 @@
+[package]
+name = "pico-view"
+description = "LCD + touch bridge with a Dart FFI surface"
+version.workspace = true
+edition.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+
+[lib]
+name = "pico_view"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[dependencies]
+dart-sys = "4.1.5"
+prost = "0.14"
+log = "0.4"
+env_logger = "0.11"
+nusb = { version = "0.2.4" }
+sha2 = { version = "0.10" }
+p256 = "0.13"
+getrandom = "0.3"

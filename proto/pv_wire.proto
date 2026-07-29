@@ -256,6 +256,9 @@ message SetParam {
   }
 }
 
+// The device answers every SetParam with one of these. The host treats SetParam
+// as fire-and-forget (a UI slider may send them rapidly), so it logs the ack
+// rather than blocking on it — but the device must still send one.
 message ParamAck {
   Status status = 1;
   string detail = 2;
@@ -263,9 +266,10 @@ message ParamAck {
 
 // --- Phase 2: haptics (DRV2605L LRA driver) ------------------------------------
 
-// Drive the panel's haptic actuator. Fire-and-forget, like SetParam: the device
-// does not ack (a dropped UI buzz is harmless). `play` triggers one ROM effect
-// through the DRV2605L waveform sequencer; `stop` clears a running effect.
+// Drive the panel's haptic actuator. Truly fire-and-forget: unlike SetParam
+// there is no ack message at all (a dropped UI buzz is harmless). `play`
+// triggers one ROM effect through the DRV2605L waveform sequencer; `stop`
+// clears a running effect.
 message Haptics {
   oneof cmd {
     HapticsPlay play = 1;

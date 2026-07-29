@@ -1,0 +1,45 @@
+name: Publish to pub.dev
+
+# Publishes the Dart `pico_view` package (packages/pico_view/) to pub.dev.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+concurrency:
+  group: publish-${{ github.ref_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish package
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+    defaults:
+      run:
+        working-directory: packages/pico_view
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag == pubspec.yaml version
+        shell: bash
+        run: |
+          tag="${{ github.ref_name }}"
+          ver="$(awk '/^version:/{print $2; exit}' pubspec.yaml)"
+          if [ "$tag" != "v$ver" ]; then
+            echo "::error::Release tag '$tag' does not match pubspec.yaml version 'v$ver'. Bump pubspec.yaml or retag."
+            exit 1
+          fi
+          echo "Tag '$tag' matches pubspec.yaml version 'v$ver'."
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+
+      - name: Resolve dependencies
+        run: flutter pub get
+
+      - name: Publish
+        run: flutter pub publish --force

@@ -1,0 +1,249 @@
+name: Release native libraries
+
+# Builds the `pico_view` engine for every desktop target and publishes the
+# resulting shared libraries to a GitHub Release, so the public `pico_view`
+# package can download prebuilt binaries instead of compiling the engine.
+#
+# Native libs only need rebuilding when the Rust engine in `crates/` changes:
+#
+#   engine-v0.3.0  -> this workflow: build + GitHub Release + pin in engine.lock
+#   v0.3.0         -> publish.yml:   publish the Dart package to pub.dev
+#
+# Triggers:
+#   - pushing a tag like `engine-v2.2.1`  -> publishes a release for that tag
+#   - manual run (Actions tab)            -> requires a `tag` input to publish under
+#
+# Assets are raw, triple-named files, e.g.
+#   libpico_view-x86_64-unknown-linux-gnu.so
+#   libpico_view-aarch64-apple-darwin.dylib
+#   pico_view-x86_64-pc-windows-msvc.dll
+#
+# Pipeline: verify -> build -> release -> update-lock. `verify` refuses to
+# release if the tag and Cargo.toml version disagree; `update-lock` writes the
+# just-published tag and checksums back into
+# `packages/pico_view/native/engine.lock` on the default branch, so the
+# download hook never has to be updated by hand.
+
+on:
+  push:
+    tags:
+      - "engine-v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Engine release tag to create/publish (e.g. engine-v2.2.1)"
+        required: true
+        type: string
+
+concurrency:
+  group: release-${{ inputs.tag || github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    name: verify tag matches Cargo.toml
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Verify tag == Cargo.toml version
+        shell: bash
+        run: |
+          tag="${{ inputs.tag || github.ref_name }}"
+          ver="$(awk -F'"' '/^version/{print $2; exit}' Cargo.toml)"
+          if [ "$tag" != "engine-v$ver" ]; then
+            echo "::error::Release tag '$tag' does not match Cargo.toml version (expected 'engine-v$ver'). Bump Cargo.toml or retag."
+            exit 1
+          fi
+          echo "Tag '$tag' matches Cargo.toml version 'v$ver'."
+
+  proto:
+    name: verify committed protobuf is up to date
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      # protoc is needed only here, to regenerate and compare — never on the
+      # build matrix, since the generated sources are committed.
+      - name: Install protoc
+        uses: arduino/setup-protoc@v3
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Regenerate and check for drift
+        shell: bash
+        run: |
+          cargo xtask gen-proto
+          if ! git diff --quiet -- crates/pico-view/src/proto; then
+            echo "::error::Committed protobuf sources are stale. Run 'cargo xtask gen-proto' and commit the result."
+            git --no-pager diff -- crates/pico-view/src/proto
+            exit 1
+          fi
+          echo "Committed protobuf sources are up to date."
+
+  build:
+    name: build ${{ matrix.target }}
+    needs: [verify, proto]
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            os: ubuntu-latest
+            lib: libpico_view.so
+            asset: libpico_view-x86_64-unknown-linux-gnu.so
+          - target: aarch64-unknown-linux-gnu
+            os: ubuntu-24.04-arm
+            lib: libpico_view.so
+            asset: libpico_view-aarch64-unknown-linux-gnu.so
+          - target: aarch64-apple-darwin
+            os: macos-latest
+            lib: libpico_view.dylib
+            asset: libpico_view-aarch64-apple-darwin.dylib
+          - target: x86_64-apple-darwin
+            # Cross-compiled on the arm64 runner.
+            os: macos-latest
+            lib: libpico_view.dylib
+            asset: libpico_view-x86_64-apple-darwin.dylib
+          - target: x86_64-pc-windows-msvc
+            os: windows-latest
+            lib: pico_view.dll
+            asset: pico_view-x86_64-pc-windows-msvc.dll
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: ${{ matrix.target }}
+
+      - name: Build
+        shell: bash
+        run: cargo build --release -p pico-view --target ${{ matrix.target }}
+
+      - name: Stage asset
+        shell: bash
+        run: |
+          mkdir -p dist
+          cp "target/${{ matrix.target }}/release/${{ matrix.lib }}" "dist/${{ matrix.asset }}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: dist/${{ matrix.asset }}
+          if-no-files-found: error
+
+  release:
+    name: Publish release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Generate checksums + provenance
+        shell: bash
+        run: |
+          cd dist
+          # Scope the glob to the library assets: a bare `*` would also hash the
+          # just-created (empty) SHA256SUMS and the later VERSION file.
+          sha256sum libpico_view-* pico_view-* > SHA256SUMS
+          ver="$(awk -F'"' '/^version/{print $2; exit}' "$GITHUB_WORKSPACE/Cargo.toml")"
+          rev="$(git -C "$GITHUB_WORKSPACE" rev-parse --short HEAD)"
+          {
+            echo "# pico-view-engine source revision that produced these binaries."
+            echo "engine_version = $ver"
+            echo "engine_commit = $rev"
+          } > VERSION
+          ls -la
+
+      # Reused verbatim by update-lock so the committed lock and the published
+      # release share the exact same checksum bytes.
+      - uses: actions/upload-artifact@v4
+        with:
+          name: checksums
+          path: dist/SHA256SUMS
+          if-no-files-found: error
+
+      - name: Publish to GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag || github.ref_name }}
+          files: |
+            dist/*
+          fail_on_unmatched_files: true
+          generate_release_notes: true
+
+  update-lock:
+    name: Pin release in engine.lock
+    needs: release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+
+      - name: Fetch published checksums
+        uses: actions/download-artifact@v4
+        with:
+          name: checksums
+          path: checksums
+
+      - name: Regenerate engine.lock
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag="${{ inputs.tag || github.ref_name }}"
+          repo="${{ github.repository }}"
+          lock="packages/pico_view/native/engine.lock"
+
+          {
+            echo "# Pins the prebuilt \`pico-view\` engine release that hook/build.dart downloads."
+            echo "#"
+            echo "# GENERATED by .github/workflows/release.yml on each \`engine-v*\` release — do"
+            echo "# not edit by hand. The engine source is in this same repo under \`crates/\`; the"
+            echo "# binaries are not committed. To bump, push a new \`engine-v*\` tag."
+            echo "repo = ${repo}"
+            echo "tag = ${tag}"
+            echo ""
+            # sha256sum output, verbatim from the release's SHA256SUMS. The hook
+            # parses these `<digest>  <name>` lines directly.
+            cat checksums/SHA256SUMS
+          } > "$lock"
+
+          echo "Regenerated $lock:"
+          cat "$lock"
+
+      - name: Commit to default branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          lock="packages/pico_view/native/engine.lock"
+          tag="${{ inputs.tag || github.ref_name }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- "$lock"; then
+            echo "engine.lock already matches $tag; nothing to commit."
+            exit 0
+          fi
+
+          git add "$lock"
+          git commit -m "chore: pin pico-view engine ${tag} in engine.lock [skip ci]"
+          git push origin "HEAD:${{ github.event.repository.default_branch }}"

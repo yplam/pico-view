@@ -1,0 +1,18 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/pico-view",
+    "crates/xtask",
+]
+
+[workspace.package]
+version = "0.3.0"
+edition = "2024"
+rust-version = "1.95"
+repository = "https://github.com/yplam/pico-view"
+
+[profile.release]
+lto = true
+codegen-units = 1
+strip = true
+opt-level = 's'

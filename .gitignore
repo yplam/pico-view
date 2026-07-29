@@ -1,0 +1,22 @@
+# Rust build output
+/target
+**/target
+
+# Dart/Flutter build output
+.dart_tool/
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# The engine libraries are NOT committed: hook/build.dart downloads the release
+# assets pinned in packages/pico_view/native/engine.lock. Everything else that
+# lands there is a local build, a download cache, or the `engine.local` escape
+# hatch naming a locally built cdylib (written by ./build.sh).
+packages/pico_view/native/*
+!packages/pico_view/native/engine.lock
+!packages/pico_view/native/README.md
+
+# Editors / OS
+.DS_Store
+.idea
+**/__pycache__/
