@@ -1,0 +1,129 @@
+// pico-view FFI control plane — the Dart <-> Rust boundary.
+//
+// The C ABI is frozen at five functions:
+//
+//   pv_init(api_data, send_port)                          — once, at startup
+//   pv_request(req, req_len, &resp, &resp_len) -> int32   — PvRequest in, PvResponse out
+//   pv_free(ptr, len)                                     — free a pv_request response
+//   pv_lcd_flush(rgba, len, w, h) -> int32                — hot path, stays raw
+//   pv_close() -> int32                                   — tear down
+//
+// pv_request returns 0 whenever a PvResponse was produced (including an
+// `error` response); nonzero only for transport-level failure.
+//
+// Device-originated payloads reuse the wire messages (picoview.wire.*) so the
+// Rust layer forwards them without re-mapping.
+
+syntax = "proto3";
+
+package picoview.ffi;
+
+import "pv_wire.proto";
+
+// --- Requests ------------------------------------------------------------------
+
+message PvRequest {
+  oneof req {
+    OpenDevice open_device = 1;
+    CloseDevice close_device = 2;
+    OtaStart ota_start = 3;
+
+    // Forwarded to the device.
+    picoview.wire.GetDeviceInfo get_device_info = 16;
+    picoview.wire.SetParam set_param = 17;
+    picoview.wire.Haptics haptics = 18;
+  }
+}
+
+// Open the panel device and start a session. Request/reply: responds `ack` once
+// the device is open and the panel initialized, ERROR_CODE_DEVICE when that
+// fails, or ERROR_CODE_TIMEOUT if the worker did not get to it in time. A
+// LinkEvent(CONNECTED) is posted alongside the `ack`.
+message OpenDevice {
+  // Nth enumerated device matching the pico-view VID/PID (ignored when `serial` is set).
+  uint32 index = 1;
+  // Panel model preset name, e.g. "st77916-round-360"; empty = default.
+  string model = 2;
+  // Select by USB serial instead of index; empty = use index.
+  string serial = 3;
+}
+
+// Stop the worker and close the device. Responds `ack` after teardown completes.
+message CloseDevice {}
+
+// Stream a signed ESP-IDF app image to the device and commit it. Responds
+// `ack` once enqueued; progress/result arrive as wire.OtaStatus events.
+message OtaStart {
+  bytes image = 1;
+}
+
+// --- Responses -------------------------------------------------------------------
+
+message PvResponse {
+  oneof resp {
+    Ack ack = 1;
+    Error error = 2;
+    picoview.wire.DeviceInfo device_info = 3;
+  }
+}
+
+message Ack {}
+
+enum ErrorCode {
+  ERROR_CODE_UNSPECIFIED = 0;
+  // Request decoded but is invalid (bad model name, empty image, ...).
+  ERROR_CODE_BAD_REQUEST = 1;
+  // open_device while a worker is running. Dart's hot-restart recovery relies
+  // on this being distinct: close_device, then retry the open once.
+  ERROR_CODE_ALREADY_OPEN = 2;
+  // Device-dependent request with no device open.
+  ERROR_CODE_NOT_OPEN = 3;
+  // USB / device-setup failure.
+  ERROR_CODE_DEVICE = 4;
+  // Worker queue gone (engine shutting down).
+  ERROR_CODE_ENQUEUE = 5;
+  // This engine build doesn't know the request variant.
+  ERROR_CODE_UNSUPPORTED = 6;
+  ERROR_CODE_INTERNAL = 7;
+  // A request/reply command got no answer before its deadline.
+  ERROR_CODE_TIMEOUT = 8;
+}
+
+message Error {
+  ErrorCode code = 1;
+  string message = 2;
+}
+
+// --- Events (Rust -> Dart, one encoded PvEvent per SendPort post) ------------------
+
+enum LinkState {
+  LINK_STATE_UNSPECIFIED = 0;
+  // Attached and configured.
+  LINK_STATE_CONNECTED = 1;
+  // Lost (unplug / OTA reboot); the engine reconnects on its own.
+  LINK_STATE_DISCONNECTED = 2;
+}
+
+// Posted on transitions only (the worker de-duplicates).
+message LinkEvent {
+  LinkState state = 1;
+  // Reason for DISCONNECTED, for logs and the settings UI.
+  string detail = 2;
+  // Genuine-hardware result, meaningful only on CONNECTED: the device presented
+  // a valid vendor-CA-signed certificate and answered the attestation challenge.
+  bool verified = 3;
+  // The attested device id (from the certificate). Meaningful only when
+  // `verified`; empty otherwise.
+  string device_id = 4;
+  // The device's firmware version string (ESP-IDF app version, e.g. "1.4.0"),
+  // as reported in the HELLO_ACK handshake. Meaningful only on CONNECTED.
+  string fw_version = 5;
+}
+
+message PvEvent {
+  oneof event {
+    picoview.wire.Touch touch = 1;
+    LinkEvent link = 2;
+    picoview.wire.OtaStatus ota = 3;
+  }
+}

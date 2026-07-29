@@ -1,0 +1,16 @@
+# nanopb field bounds for pv_wire.proto
+
+picoview.wire.HelloAck.fw_version        max_size:32
+picoview.wire.OtaBegin.sha256            max_size:32  fixed_length:true
+picoview.wire.OtaBegin.version           max_size:32
+# PV_OTA_CHUNK_MAX
+picoview.wire.OtaData.data               max_size:8192
+picoview.wire.AuthChallenge.nonce        max_size:32  fixed_length:true
+# ECDSA P-256 identity: sizeof(pv_device_cert_t)=157, ECDSA r||s sig 64.
+picoview.wire.AuthResponse.certificate   max_size:157
+picoview.wire.AuthResponse.signature     max_size:64
+picoview.wire.ConfigAck.detail           max_size:64
+picoview.wire.ParamAck.detail            max_size:64
+picoview.wire.DeviceInfo.device_id       max_size:17
+picoview.wire.DeviceInfo.serial          max_size:33
+picoview.wire.DeviceInfo.fw_version      max_size:32

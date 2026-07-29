@@ -1,0 +1,285 @@
+// pico-view wire protocol — host engine (crates/pico-view) <-> ESP32-P4
+// firmware. Shared with the Dart FFI layer: pv_ffi.proto imports this file so
+// device-originated payloads (touch, OTA status) are forwarded to Dart without
+// re-mapping.
+//
+// ## Outer framing
+//
+// Every USB bulk transfer carries frames of:
+//
+//   magic "PVUS" (u32 LE) | type (u16 LE) | flags (u16 LE) | payload_len (u32 LE)
+//
+// frame types:
+//   3  = BLIT  — raw payload: x,y,w,h (u16 LE each) + RGB565-BE pixels.
+//                flags bit0 = PRESENT (last region of the frame).
+//                Identical to v1 MSG_BLIT; deliberately NOT protobuf — a full
+//                360x360 frame is ~253 KB and needs no schema evolution.
+//   32 = CTRL  — payload is ONE encoded message: HostToDevice on the OUT
+//                endpoint, DeviceToHost on the IN endpoint. flags unused (0).
+//
+//
+// ## Codegen
+//
+//   Rust: prost via build.rs in crates/pico-view
+//   C:    nanopb, bounded by pv_wire.options (firmware/esp32p4-pico-view)
+//   Dart: protoc_plugin -> nano-dash/packages/pico_view/lib/src/gen/
+
+syntax = "proto3";
+
+package picoview.wire;
+
+// --- Envelopes ---------------------------------------------------------------
+
+// One CTRL frame on the OUT (host -> device) endpoint.
+message HostToDevice {
+  oneof msg {
+    Hello hello = 1;
+    Config config = 2;
+    OtaBegin ota_begin = 3;
+    OtaData ota_data = 4;
+    OtaEnd ota_end = 5;
+    OtaAbort ota_abort = 6;
+    AuthChallenge auth_challenge = 7;
+
+    // Phase 2.
+    GetDeviceInfo get_device_info = 16;
+    SetParam set_param = 17;
+    Haptics haptics = 18;
+    Keepalive keepalive = 19;
+  }
+
+}
+
+// One CTRL frame on the IN (device -> host) endpoint.
+message DeviceToHost {
+  oneof msg {
+    HelloAck hello_ack = 1;
+    Touch touch = 2;
+    OtaStatus ota_status = 3;
+    AuthResponse auth_response = 4;
+    ConfigAck config_ack = 5;
+
+    // Phase 2.
+    DeviceInfo device_info = 16;
+    ParamAck param_ack = 17;
+  }
+}
+
+// --- Shared enums ------------------------------------------------------------
+
+enum Status {
+  STATUS_UNSPECIFIED = 0;
+  STATUS_OK = 1;
+  STATUS_ERROR = 2;
+  STATUS_UNSUPPORTED = 3;
+}
+
+// --- Handshake ---------------------------------------------------------------
+
+message Hello {
+  // PV_PROTO_VERSION of the host.
+  uint32 proto_version = 1;
+}
+
+// Replaces the v1 packed caps bitfield with named flags.
+message Capabilities {
+  bool set_param = 1;
+  // Device has a DRV2605L haptic driver and answers Haptics messages.
+  bool haptics = 2;
+  // Device carries a vendor-provisioned identity and answers AuthChallenge.
+  bool auth = 3;
+}
+
+message HelloAck {
+  uint32 proto_version = 1;
+  Capabilities caps = 2;
+  string fw_version = 3;
+}
+
+// --- Panel configuration -----------------------------------------------------
+
+// Firmware-side display driver profile .
+enum PanelModel {
+  PANEL_MODEL_UNSPECIFIED = 0;
+  PANEL_MODEL_ST77916 = 1;
+  PANEL_MODEL_ST7789 = 2;
+}
+
+enum PanelShape {
+  PANEL_SHAPE_UNSPECIFIED = 0;
+  PANEL_SHAPE_RECT = 1;
+  PANEL_SHAPE_ROUND = 2;
+}
+
+// Resolved from the host's panel preset registry.
+message Config {
+  PanelModel model = 1;
+  // Visible size in pixels, in the panel's wired orientation.
+  uint32 width = 2;
+  uint32 height = 3;
+  // Glass insets into controller RAM.
+  uint32 x_offset = 4;
+  uint32 y_offset = 5;
+  // 0 / 90 / 180 / 270; drives MADCTL.
+  uint32 rotation_deg = 6;
+  bool invert = 7;
+  // 7-bit I2C address of the touch controller; 0 disables touch.
+  uint32 touch_addr = 8;
+  // Axis transforms the device applies before reporting touches.
+  bool touch_swap_xy = 9;
+  bool touch_flip_x = 10;
+  bool touch_flip_y = 11;
+}
+
+message ConfigAck {
+  Status status = 1;
+  // Human-readable reason when status != OK (host logs it verbatim).
+  string detail = 2;
+}
+
+// --- Touch -------------------------------------------------------------------
+
+enum TouchPhase {
+  TOUCH_PHASE_UNSPECIFIED = 0;
+  TOUCH_PHASE_DOWN = 1;
+  TOUCH_PHASE_MOVE = 2;
+  TOUCH_PHASE_UP = 3;
+}
+
+// The firmware runs the down/move/up state machine and axis transforms; the
+// host forwards this to Dart untouched. (0,0) on UP.
+message Touch {
+  TouchPhase phase = 1;
+  uint32 x = 2;
+  uint32 y = 3;
+}
+
+// --- Firmware update ---------------------------------------------------------
+
+message OtaBegin {
+  uint32 image_size = 1;
+  // SHA-256 of the full image; the device verifies before committing.
+  bytes sha256 = 2;
+  // esp_app_desc_t version extracted from the image (log-only on device).
+  string version = 3;
+}
+
+message OtaData {
+  // Chunk index, starting at 0 (detects drops on a desynced stream).
+  uint32 seq = 1;
+  // Image bytes, at most 8192 per chunk (PV_OTA_CHUNK_MAX).
+  bytes data = 2;
+}
+
+message OtaEnd {}
+
+// Discard a partial transfer (host-side cancel).
+message OtaAbort {}
+
+enum OtaState {
+  OTA_STATE_UNSPECIFIED = 0;
+  OTA_STATE_RECEIVING = 1;
+  OTA_STATE_VERIFYING = 2;
+  OTA_STATE_DONE = 3;
+  OTA_STATE_FAILED = 4;
+}
+
+message OtaStatus {
+  OtaState state = 1;
+  // Receive progress, 0–100.
+  uint32 pct = 2;
+  // Device-side pv_ota_err code; 0 when state != FAILED.
+  sint32 err = 3;
+}
+
+// Liveness heartbeat. The host sends one at least every second while it holds
+// the link open.
+message Keepalive {}
+
+message AuthChallenge {
+  // Fresh random nonce, exactly 32 bytes.
+  bytes nonce = 1;
+}
+
+enum AuthStatus {
+  AUTH_STATUS_UNSPECIFIED = 0;
+  AUTH_STATUS_OK = 1;
+  // Board with no vendor-provisioned identity (self-built, or a wiped devid).
+  AUTH_STATUS_UNPROVISIONED = 2;
+  AUTH_STATUS_SIGNING_ERROR = 3;
+  AUTH_STATUS_MALFORMED_CHALLENGE = 4;
+}
+
+message AuthResponse {
+  AuthStatus status = 1;
+  // Opaque device certificate: version/device-id/issued-at/expires-at/device-
+  // pubkey + CA signature (pv_device_cert_t, 157 bytes). Its layout is its own
+  // versioned format keyed on cert[0] (cert_version), parsed at fixed offsets by
+  // the host's auth.rs, independent of this schema. The device key and the CA
+  // that signs the cert are both ECDSA P-256. Empty when status != OK.
+  bytes certificate = 2;
+  // ECDSA P-256/SHA-256 signature over sha256("PVUS-ATTEST-V2" || nonce ||
+  // device_pubkey), a 64-byte r||s pair, produced by the device's eFuse ECDSA
+  // key via the on-chip ECDSA peripheral. Empty when status != OK.
+  bytes signature = 3;
+}
+
+// --- Phase 2: device info ------------------------------------------------------
+
+message GetDeviceInfo {}
+
+message PanelGeometry {
+  uint32 width = 1;
+  uint32 height = 2;
+  PanelShape shape = 3;
+}
+
+// Lets the app select devices by serial and size its capture surface from the
+// device instead of the Dart-side kPicoViewModels table.
+message DeviceInfo {
+  // Factory device id burned in at provisioning (e.g. "PV4-A00123").
+  string device_id = 1;
+  // USB serial string.
+  string serial = 2;
+  string fw_version = 3;
+  uint32 proto_version = 4;
+  PanelGeometry panel = 5;
+  Capabilities caps = 6;
+}
+
+// --- Phase 2: runtime parameters -----------------------------------------------
+
+message SetParam {
+  oneof param {
+    // Backlight, 0 (off) – 255 (full).
+    uint32 brightness = 1;
+  }
+}
+
+message ParamAck {
+  Status status = 1;
+  string detail = 2;
+}
+
+// --- Phase 2: haptics (DRV2605L LRA driver) ------------------------------------
+
+// Drive the panel's haptic actuator. Fire-and-forget, like SetParam: the device
+// does not ack (a dropped UI buzz is harmless). `play` triggers one ROM effect
+// through the DRV2605L waveform sequencer; `stop` clears a running effect.
+message Haptics {
+  oneof cmd {
+    HapticsPlay play = 1;
+    HapticsStop stop = 2;
+  }
+}
+
+message HapticsPlay {
+  // ROM effect id, 1..123 (DRV2605L waveform library; see datasheet Table 12).
+  // 0 is not a valid effect and is ignored by the device.
+  uint32 effect = 1;
+  // ROM library 1..7 to source the effect from; 0 keeps the firmware default
+  // (LRA library 6). Lets the host pick an ERM/LRA library without a rebuild.
+  uint32 library = 2;
+}
+
+message HapticsStop {}
