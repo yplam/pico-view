@@ -1,0 +1,20 @@
+# Pins the prebuilt `pico-view` engine release that hook/build.dart downloads.
+#
+# The engine source is in this same repo under `crates/`; the binaries are not
+# committed. Pushing a `v*` tag runs .github/workflows/release.yml, which builds
+# all five desktop targets and publishes them alongside a `SHA256SUMS` asset.
+#
+# To bump: publish the release, then replace the checksum block below with the
+# contents of that release's SHA256SUMS (it is already in this exact format).
+repo = yplam/pico-view
+tag = v0.3.0
+
+# TODO: paste the v0.3.0 SHA256SUMS here. Until then every build fails with
+# "No SHA-256 pinned for ..." unless it uses the engine.local override.
+# Expected asset names:
+#
+#   libpico_view-aarch64-apple-darwin.dylib
+#   libpico_view-aarch64-unknown-linux-gnu.so
+#   libpico_view-x86_64-apple-darwin.dylib
+#   libpico_view-x86_64-unknown-linux-gnu.so
+#   pico_view-x86_64-pc-windows-msvc.dll

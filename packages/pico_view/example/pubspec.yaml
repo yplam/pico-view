@@ -1,0 +1,27 @@
+name: pico_view_example
+description: "Mirrors a clock widget to a pico-view panel, with touch fed back."
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.12.2
+  flutter: '>=3.44.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  pico_view:
+    path: ../
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^6.0.0
+
+flutter:
+  uses-material-design: true
+
+# To run this example against an engine built from `crates/` in this repo, run
+# ./build.sh at the repo root — it writes ../native/engine.local (see
+# ../native/README.md). Otherwise the build hook downloads the release pinned in
+# ../native/engine.lock.

@@ -1,0 +1,2078 @@
+// This is a generated file - do not edit.
+//
+// Generated from pv_wire.proto.
+
+// @dart = 3.3
+
+// ignore_for_file: annotate_overrides, camel_case_types, comment_references
+// ignore_for_file: constant_identifier_names
+// ignore_for_file: curly_braces_in_flow_control_structures
+// ignore_for_file: deprecated_member_use_from_same_package, library_prefixes
+// ignore_for_file: non_constant_identifier_names, prefer_relative_imports
+
+import 'dart:core' as $core;
+
+import 'package:protobuf/protobuf.dart' as $pb;
+
+import 'pv_wire.pbenum.dart';
+
+export 'package:protobuf/protobuf.dart' show GeneratedMessageGenericExtensions;
+
+export 'pv_wire.pbenum.dart';
+
+enum HostToDevice_Msg {
+  hello,
+  config,
+  otaBegin,
+  otaData,
+  otaEnd,
+  otaAbort,
+  authChallenge,
+  getDeviceInfo,
+  setParam,
+  haptics,
+  keepalive,
+  notSet
+}
+
+/// One CTRL frame on the OUT (host -> device) endpoint.
+class HostToDevice extends $pb.GeneratedMessage {
+  factory HostToDevice({
+    Hello? hello,
+    Config? config,
+    OtaBegin? otaBegin,
+    OtaData? otaData,
+    OtaEnd? otaEnd,
+    OtaAbort? otaAbort,
+    AuthChallenge? authChallenge,
+    GetDeviceInfo? getDeviceInfo,
+    SetParam? setParam,
+    Haptics? haptics,
+    Keepalive? keepalive,
+  }) {
+    final result = create();
+    if (hello != null) result.hello = hello;
+    if (config != null) result.config = config;
+    if (otaBegin != null) result.otaBegin = otaBegin;
+    if (otaData != null) result.otaData = otaData;
+    if (otaEnd != null) result.otaEnd = otaEnd;
+    if (otaAbort != null) result.otaAbort = otaAbort;
+    if (authChallenge != null) result.authChallenge = authChallenge;
+    if (getDeviceInfo != null) result.getDeviceInfo = getDeviceInfo;
+    if (setParam != null) result.setParam = setParam;
+    if (haptics != null) result.haptics = haptics;
+    if (keepalive != null) result.keepalive = keepalive;
+    return result;
+  }
+
+  HostToDevice._();
+
+  factory HostToDevice.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory HostToDevice.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static const $core.Map<$core.int, HostToDevice_Msg> _HostToDevice_MsgByTag = {
+    1: HostToDevice_Msg.hello,
+    2: HostToDevice_Msg.config,
+    3: HostToDevice_Msg.otaBegin,
+    4: HostToDevice_Msg.otaData,
+    5: HostToDevice_Msg.otaEnd,
+    6: HostToDevice_Msg.otaAbort,
+    7: HostToDevice_Msg.authChallenge,
+    16: HostToDevice_Msg.getDeviceInfo,
+    17: HostToDevice_Msg.setParam,
+    18: HostToDevice_Msg.haptics,
+    19: HostToDevice_Msg.keepalive,
+    0: HostToDevice_Msg.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HostToDevice',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..oo(0, [1, 2, 3, 4, 5, 6, 7, 16, 17, 18, 19])
+    ..aOM<Hello>(1, _omitFieldNames ? '' : 'hello', subBuilder: Hello.create)
+    ..aOM<Config>(2, _omitFieldNames ? '' : 'config', subBuilder: Config.create)
+    ..aOM<OtaBegin>(3, _omitFieldNames ? '' : 'otaBegin',
+        subBuilder: OtaBegin.create)
+    ..aOM<OtaData>(4, _omitFieldNames ? '' : 'otaData',
+        subBuilder: OtaData.create)
+    ..aOM<OtaEnd>(5, _omitFieldNames ? '' : 'otaEnd', subBuilder: OtaEnd.create)
+    ..aOM<OtaAbort>(6, _omitFieldNames ? '' : 'otaAbort',
+        subBuilder: OtaAbort.create)
+    ..aOM<AuthChallenge>(7, _omitFieldNames ? '' : 'authChallenge',
+        subBuilder: AuthChallenge.create)
+    ..aOM<GetDeviceInfo>(16, _omitFieldNames ? '' : 'getDeviceInfo',
+        subBuilder: GetDeviceInfo.create)
+    ..aOM<SetParam>(17, _omitFieldNames ? '' : 'setParam',
+        subBuilder: SetParam.create)
+    ..aOM<Haptics>(18, _omitFieldNames ? '' : 'haptics',
+        subBuilder: Haptics.create)
+    ..aOM<Keepalive>(19, _omitFieldNames ? '' : 'keepalive',
+        subBuilder: Keepalive.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HostToDevice clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HostToDevice copyWith(void Function(HostToDevice) updates) =>
+      super.copyWith((message) => updates(message as HostToDevice))
+          as HostToDevice;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static HostToDevice create() => HostToDevice._();
+  @$core.override
+  HostToDevice createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static HostToDevice getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<HostToDevice>(create);
+  static HostToDevice? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
+  @$pb.TagNumber(18)
+  @$pb.TagNumber(19)
+  HostToDevice_Msg whichMsg() => _HostToDevice_MsgByTag[$_whichOneof(0)]!;
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
+  @$pb.TagNumber(6)
+  @$pb.TagNumber(7)
+  @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
+  @$pb.TagNumber(18)
+  @$pb.TagNumber(19)
+  void clearMsg() => $_clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  Hello get hello => $_getN(0);
+  @$pb.TagNumber(1)
+  set hello(Hello value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasHello() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearHello() => $_clearField(1);
+  @$pb.TagNumber(1)
+  Hello ensureHello() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  Config get config => $_getN(1);
+  @$pb.TagNumber(2)
+  set config(Config value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasConfig() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearConfig() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Config ensureConfig() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  OtaBegin get otaBegin => $_getN(2);
+  @$pb.TagNumber(3)
+  set otaBegin(OtaBegin value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasOtaBegin() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOtaBegin() => $_clearField(3);
+  @$pb.TagNumber(3)
+  OtaBegin ensureOtaBegin() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  OtaData get otaData => $_getN(3);
+  @$pb.TagNumber(4)
+  set otaData(OtaData value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasOtaData() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearOtaData() => $_clearField(4);
+  @$pb.TagNumber(4)
+  OtaData ensureOtaData() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  OtaEnd get otaEnd => $_getN(4);
+  @$pb.TagNumber(5)
+  set otaEnd(OtaEnd value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasOtaEnd() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOtaEnd() => $_clearField(5);
+  @$pb.TagNumber(5)
+  OtaEnd ensureOtaEnd() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  OtaAbort get otaAbort => $_getN(5);
+  @$pb.TagNumber(6)
+  set otaAbort(OtaAbort value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasOtaAbort() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearOtaAbort() => $_clearField(6);
+  @$pb.TagNumber(6)
+  OtaAbort ensureOtaAbort() => $_ensure(5);
+
+  @$pb.TagNumber(7)
+  AuthChallenge get authChallenge => $_getN(6);
+  @$pb.TagNumber(7)
+  set authChallenge(AuthChallenge value) => $_setField(7, value);
+  @$pb.TagNumber(7)
+  $core.bool hasAuthChallenge() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearAuthChallenge() => $_clearField(7);
+  @$pb.TagNumber(7)
+  AuthChallenge ensureAuthChallenge() => $_ensure(6);
+
+  /// Phase 2.
+  @$pb.TagNumber(16)
+  GetDeviceInfo get getDeviceInfo => $_getN(7);
+  @$pb.TagNumber(16)
+  set getDeviceInfo(GetDeviceInfo value) => $_setField(16, value);
+  @$pb.TagNumber(16)
+  $core.bool hasGetDeviceInfo() => $_has(7);
+  @$pb.TagNumber(16)
+  void clearGetDeviceInfo() => $_clearField(16);
+  @$pb.TagNumber(16)
+  GetDeviceInfo ensureGetDeviceInfo() => $_ensure(7);
+
+  @$pb.TagNumber(17)
+  SetParam get setParam => $_getN(8);
+  @$pb.TagNumber(17)
+  set setParam(SetParam value) => $_setField(17, value);
+  @$pb.TagNumber(17)
+  $core.bool hasSetParam() => $_has(8);
+  @$pb.TagNumber(17)
+  void clearSetParam() => $_clearField(17);
+  @$pb.TagNumber(17)
+  SetParam ensureSetParam() => $_ensure(8);
+
+  @$pb.TagNumber(18)
+  Haptics get haptics => $_getN(9);
+  @$pb.TagNumber(18)
+  set haptics(Haptics value) => $_setField(18, value);
+  @$pb.TagNumber(18)
+  $core.bool hasHaptics() => $_has(9);
+  @$pb.TagNumber(18)
+  void clearHaptics() => $_clearField(18);
+  @$pb.TagNumber(18)
+  Haptics ensureHaptics() => $_ensure(9);
+
+  @$pb.TagNumber(19)
+  Keepalive get keepalive => $_getN(10);
+  @$pb.TagNumber(19)
+  set keepalive(Keepalive value) => $_setField(19, value);
+  @$pb.TagNumber(19)
+  $core.bool hasKeepalive() => $_has(10);
+  @$pb.TagNumber(19)
+  void clearKeepalive() => $_clearField(19);
+  @$pb.TagNumber(19)
+  Keepalive ensureKeepalive() => $_ensure(10);
+}
+
+enum DeviceToHost_Msg {
+  helloAck,
+  touch,
+  otaStatus,
+  authResponse,
+  configAck,
+  deviceInfo,
+  paramAck,
+  notSet
+}
+
+/// One CTRL frame on the IN (device -> host) endpoint.
+class DeviceToHost extends $pb.GeneratedMessage {
+  factory DeviceToHost({
+    HelloAck? helloAck,
+    Touch? touch,
+    OtaStatus? otaStatus,
+    AuthResponse? authResponse,
+    ConfigAck? configAck,
+    DeviceInfo? deviceInfo,
+    ParamAck? paramAck,
+  }) {
+    final result = create();
+    if (helloAck != null) result.helloAck = helloAck;
+    if (touch != null) result.touch = touch;
+    if (otaStatus != null) result.otaStatus = otaStatus;
+    if (authResponse != null) result.authResponse = authResponse;
+    if (configAck != null) result.configAck = configAck;
+    if (deviceInfo != null) result.deviceInfo = deviceInfo;
+    if (paramAck != null) result.paramAck = paramAck;
+    return result;
+  }
+
+  DeviceToHost._();
+
+  factory DeviceToHost.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DeviceToHost.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static const $core.Map<$core.int, DeviceToHost_Msg> _DeviceToHost_MsgByTag = {
+    1: DeviceToHost_Msg.helloAck,
+    2: DeviceToHost_Msg.touch,
+    3: DeviceToHost_Msg.otaStatus,
+    4: DeviceToHost_Msg.authResponse,
+    5: DeviceToHost_Msg.configAck,
+    16: DeviceToHost_Msg.deviceInfo,
+    17: DeviceToHost_Msg.paramAck,
+    0: DeviceToHost_Msg.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DeviceToHost',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..oo(0, [1, 2, 3, 4, 5, 16, 17])
+    ..aOM<HelloAck>(1, _omitFieldNames ? '' : 'helloAck',
+        subBuilder: HelloAck.create)
+    ..aOM<Touch>(2, _omitFieldNames ? '' : 'touch', subBuilder: Touch.create)
+    ..aOM<OtaStatus>(3, _omitFieldNames ? '' : 'otaStatus',
+        subBuilder: OtaStatus.create)
+    ..aOM<AuthResponse>(4, _omitFieldNames ? '' : 'authResponse',
+        subBuilder: AuthResponse.create)
+    ..aOM<ConfigAck>(5, _omitFieldNames ? '' : 'configAck',
+        subBuilder: ConfigAck.create)
+    ..aOM<DeviceInfo>(16, _omitFieldNames ? '' : 'deviceInfo',
+        subBuilder: DeviceInfo.create)
+    ..aOM<ParamAck>(17, _omitFieldNames ? '' : 'paramAck',
+        subBuilder: ParamAck.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeviceToHost clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeviceToHost copyWith(void Function(DeviceToHost) updates) =>
+      super.copyWith((message) => updates(message as DeviceToHost))
+          as DeviceToHost;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DeviceToHost create() => DeviceToHost._();
+  @$core.override
+  DeviceToHost createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static DeviceToHost getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DeviceToHost>(create);
+  static DeviceToHost? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
+  @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
+  DeviceToHost_Msg whichMsg() => _DeviceToHost_MsgByTag[$_whichOneof(0)]!;
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
+  @$pb.TagNumber(16)
+  @$pb.TagNumber(17)
+  void clearMsg() => $_clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  HelloAck get helloAck => $_getN(0);
+  @$pb.TagNumber(1)
+  set helloAck(HelloAck value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasHelloAck() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearHelloAck() => $_clearField(1);
+  @$pb.TagNumber(1)
+  HelloAck ensureHelloAck() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  Touch get touch => $_getN(1);
+  @$pb.TagNumber(2)
+  set touch(Touch value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasTouch() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearTouch() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Touch ensureTouch() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  OtaStatus get otaStatus => $_getN(2);
+  @$pb.TagNumber(3)
+  set otaStatus(OtaStatus value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasOtaStatus() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearOtaStatus() => $_clearField(3);
+  @$pb.TagNumber(3)
+  OtaStatus ensureOtaStatus() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  AuthResponse get authResponse => $_getN(3);
+  @$pb.TagNumber(4)
+  set authResponse(AuthResponse value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasAuthResponse() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearAuthResponse() => $_clearField(4);
+  @$pb.TagNumber(4)
+  AuthResponse ensureAuthResponse() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  ConfigAck get configAck => $_getN(4);
+  @$pb.TagNumber(5)
+  set configAck(ConfigAck value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasConfigAck() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearConfigAck() => $_clearField(5);
+  @$pb.TagNumber(5)
+  ConfigAck ensureConfigAck() => $_ensure(4);
+
+  /// Phase 2.
+  @$pb.TagNumber(16)
+  DeviceInfo get deviceInfo => $_getN(5);
+  @$pb.TagNumber(16)
+  set deviceInfo(DeviceInfo value) => $_setField(16, value);
+  @$pb.TagNumber(16)
+  $core.bool hasDeviceInfo() => $_has(5);
+  @$pb.TagNumber(16)
+  void clearDeviceInfo() => $_clearField(16);
+  @$pb.TagNumber(16)
+  DeviceInfo ensureDeviceInfo() => $_ensure(5);
+
+  @$pb.TagNumber(17)
+  ParamAck get paramAck => $_getN(6);
+  @$pb.TagNumber(17)
+  set paramAck(ParamAck value) => $_setField(17, value);
+  @$pb.TagNumber(17)
+  $core.bool hasParamAck() => $_has(6);
+  @$pb.TagNumber(17)
+  void clearParamAck() => $_clearField(17);
+  @$pb.TagNumber(17)
+  ParamAck ensureParamAck() => $_ensure(6);
+}
+
+class Hello extends $pb.GeneratedMessage {
+  factory Hello({
+    $core.int? protoVersion,
+  }) {
+    final result = create();
+    if (protoVersion != null) result.protoVersion = protoVersion;
+    return result;
+  }
+
+  Hello._();
+
+  factory Hello.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Hello.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Hello',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'protoVersion',
+        fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Hello clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Hello copyWith(void Function(Hello) updates) =>
+      super.copyWith((message) => updates(message as Hello)) as Hello;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Hello create() => Hello._();
+  @$core.override
+  Hello createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Hello getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Hello>(create);
+  static Hello? _defaultInstance;
+
+  /// PV_PROTO_VERSION of the host.
+  @$pb.TagNumber(1)
+  $core.int get protoVersion => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set protoVersion($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasProtoVersion() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProtoVersion() => $_clearField(1);
+}
+
+/// Replaces the v1 packed caps bitfield with named flags.
+class Capabilities extends $pb.GeneratedMessage {
+  factory Capabilities({
+    $core.bool? setParam,
+    $core.bool? haptics,
+    $core.bool? auth,
+  }) {
+    final result = create();
+    if (setParam != null) result.setParam = setParam;
+    if (haptics != null) result.haptics = haptics;
+    if (auth != null) result.auth = auth;
+    return result;
+  }
+
+  Capabilities._();
+
+  factory Capabilities.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Capabilities.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Capabilities',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aOB(1, _omitFieldNames ? '' : 'setParam')
+    ..aOB(2, _omitFieldNames ? '' : 'haptics')
+    ..aOB(3, _omitFieldNames ? '' : 'auth')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Capabilities clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Capabilities copyWith(void Function(Capabilities) updates) =>
+      super.copyWith((message) => updates(message as Capabilities))
+          as Capabilities;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Capabilities create() => Capabilities._();
+  @$core.override
+  Capabilities createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Capabilities getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<Capabilities>(create);
+  static Capabilities? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.bool get setParam => $_getBF(0);
+  @$pb.TagNumber(1)
+  set setParam($core.bool value) => $_setBool(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSetParam() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSetParam() => $_clearField(1);
+
+  /// Device has a DRV2605L haptic driver and answers Haptics messages.
+  @$pb.TagNumber(2)
+  $core.bool get haptics => $_getBF(1);
+  @$pb.TagNumber(2)
+  set haptics($core.bool value) => $_setBool(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasHaptics() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHaptics() => $_clearField(2);
+
+  /// Device carries a vendor-provisioned identity and answers AuthChallenge.
+  @$pb.TagNumber(3)
+  $core.bool get auth => $_getBF(2);
+  @$pb.TagNumber(3)
+  set auth($core.bool value) => $_setBool(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasAuth() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearAuth() => $_clearField(3);
+}
+
+class HelloAck extends $pb.GeneratedMessage {
+  factory HelloAck({
+    $core.int? protoVersion,
+    Capabilities? caps,
+    $core.String? fwVersion,
+  }) {
+    final result = create();
+    if (protoVersion != null) result.protoVersion = protoVersion;
+    if (caps != null) result.caps = caps;
+    if (fwVersion != null) result.fwVersion = fwVersion;
+    return result;
+  }
+
+  HelloAck._();
+
+  factory HelloAck.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory HelloAck.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HelloAck',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'protoVersion',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aOM<Capabilities>(2, _omitFieldNames ? '' : 'caps',
+        subBuilder: Capabilities.create)
+    ..aOS(3, _omitFieldNames ? '' : 'fwVersion')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HelloAck clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HelloAck copyWith(void Function(HelloAck) updates) =>
+      super.copyWith((message) => updates(message as HelloAck)) as HelloAck;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static HelloAck create() => HelloAck._();
+  @$core.override
+  HelloAck createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static HelloAck getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<HelloAck>(create);
+  static HelloAck? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get protoVersion => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set protoVersion($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasProtoVersion() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearProtoVersion() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  Capabilities get caps => $_getN(1);
+  @$pb.TagNumber(2)
+  set caps(Capabilities value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCaps() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCaps() => $_clearField(2);
+  @$pb.TagNumber(2)
+  Capabilities ensureCaps() => $_ensure(1);
+
+  @$pb.TagNumber(3)
+  $core.String get fwVersion => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set fwVersion($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFwVersion() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFwVersion() => $_clearField(3);
+}
+
+/// Resolved from the host's panel preset registry.
+class Config extends $pb.GeneratedMessage {
+  factory Config({
+    PanelModel? model,
+    $core.int? width,
+    $core.int? height,
+    $core.int? xOffset,
+    $core.int? yOffset,
+    $core.int? rotationDeg,
+    $core.bool? invert,
+    $core.int? touchAddr,
+    $core.bool? touchSwapXy,
+    $core.bool? touchFlipX,
+    $core.bool? touchFlipY,
+  }) {
+    final result = create();
+    if (model != null) result.model = model;
+    if (width != null) result.width = width;
+    if (height != null) result.height = height;
+    if (xOffset != null) result.xOffset = xOffset;
+    if (yOffset != null) result.yOffset = yOffset;
+    if (rotationDeg != null) result.rotationDeg = rotationDeg;
+    if (invert != null) result.invert = invert;
+    if (touchAddr != null) result.touchAddr = touchAddr;
+    if (touchSwapXy != null) result.touchSwapXy = touchSwapXy;
+    if (touchFlipX != null) result.touchFlipX = touchFlipX;
+    if (touchFlipY != null) result.touchFlipY = touchFlipY;
+    return result;
+  }
+
+  Config._();
+
+  factory Config.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Config.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Config',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<PanelModel>(1, _omitFieldNames ? '' : 'model',
+        enumValues: PanelModel.values)
+    ..aI(2, _omitFieldNames ? '' : 'width', fieldType: $pb.PbFieldType.OU3)
+    ..aI(3, _omitFieldNames ? '' : 'height', fieldType: $pb.PbFieldType.OU3)
+    ..aI(4, _omitFieldNames ? '' : 'xOffset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(5, _omitFieldNames ? '' : 'yOffset', fieldType: $pb.PbFieldType.OU3)
+    ..aI(6, _omitFieldNames ? '' : 'rotationDeg',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aOB(7, _omitFieldNames ? '' : 'invert')
+    ..aI(8, _omitFieldNames ? '' : 'touchAddr', fieldType: $pb.PbFieldType.OU3)
+    ..aOB(9, _omitFieldNames ? '' : 'touchSwapXy')
+    ..aOB(10, _omitFieldNames ? '' : 'touchFlipX')
+    ..aOB(11, _omitFieldNames ? '' : 'touchFlipY')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Config clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Config copyWith(void Function(Config) updates) =>
+      super.copyWith((message) => updates(message as Config)) as Config;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Config create() => Config._();
+  @$core.override
+  Config createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Config getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Config>(create);
+  static Config? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  PanelModel get model => $_getN(0);
+  @$pb.TagNumber(1)
+  set model(PanelModel value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasModel() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearModel() => $_clearField(1);
+
+  /// Visible size in pixels, in the panel's wired orientation.
+  @$pb.TagNumber(2)
+  $core.int get width => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set width($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasWidth() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearWidth() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get height => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set height($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasHeight() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearHeight() => $_clearField(3);
+
+  /// Glass insets into controller RAM.
+  @$pb.TagNumber(4)
+  $core.int get xOffset => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set xOffset($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasXOffset() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearXOffset() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  $core.int get yOffset => $_getIZ(4);
+  @$pb.TagNumber(5)
+  set yOffset($core.int value) => $_setUnsignedInt32(4, value);
+  @$pb.TagNumber(5)
+  $core.bool hasYOffset() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearYOffset() => $_clearField(5);
+
+  /// 0 / 90 / 180 / 270; drives MADCTL.
+  @$pb.TagNumber(6)
+  $core.int get rotationDeg => $_getIZ(5);
+  @$pb.TagNumber(6)
+  set rotationDeg($core.int value) => $_setUnsignedInt32(5, value);
+  @$pb.TagNumber(6)
+  $core.bool hasRotationDeg() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearRotationDeg() => $_clearField(6);
+
+  @$pb.TagNumber(7)
+  $core.bool get invert => $_getBF(6);
+  @$pb.TagNumber(7)
+  set invert($core.bool value) => $_setBool(6, value);
+  @$pb.TagNumber(7)
+  $core.bool hasInvert() => $_has(6);
+  @$pb.TagNumber(7)
+  void clearInvert() => $_clearField(7);
+
+  /// 7-bit I2C address of the touch controller; 0 disables touch.
+  @$pb.TagNumber(8)
+  $core.int get touchAddr => $_getIZ(7);
+  @$pb.TagNumber(8)
+  set touchAddr($core.int value) => $_setUnsignedInt32(7, value);
+  @$pb.TagNumber(8)
+  $core.bool hasTouchAddr() => $_has(7);
+  @$pb.TagNumber(8)
+  void clearTouchAddr() => $_clearField(8);
+
+  /// Axis transforms the device applies before reporting touches.
+  @$pb.TagNumber(9)
+  $core.bool get touchSwapXy => $_getBF(8);
+  @$pb.TagNumber(9)
+  set touchSwapXy($core.bool value) => $_setBool(8, value);
+  @$pb.TagNumber(9)
+  $core.bool hasTouchSwapXy() => $_has(8);
+  @$pb.TagNumber(9)
+  void clearTouchSwapXy() => $_clearField(9);
+
+  @$pb.TagNumber(10)
+  $core.bool get touchFlipX => $_getBF(9);
+  @$pb.TagNumber(10)
+  set touchFlipX($core.bool value) => $_setBool(9, value);
+  @$pb.TagNumber(10)
+  $core.bool hasTouchFlipX() => $_has(9);
+  @$pb.TagNumber(10)
+  void clearTouchFlipX() => $_clearField(10);
+
+  @$pb.TagNumber(11)
+  $core.bool get touchFlipY => $_getBF(10);
+  @$pb.TagNumber(11)
+  set touchFlipY($core.bool value) => $_setBool(10, value);
+  @$pb.TagNumber(11)
+  $core.bool hasTouchFlipY() => $_has(10);
+  @$pb.TagNumber(11)
+  void clearTouchFlipY() => $_clearField(11);
+}
+
+class ConfigAck extends $pb.GeneratedMessage {
+  factory ConfigAck({
+    Status? status,
+    $core.String? detail,
+  }) {
+    final result = create();
+    if (status != null) result.status = status;
+    if (detail != null) result.detail = detail;
+    return result;
+  }
+
+  ConfigAck._();
+
+  factory ConfigAck.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ConfigAck.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ConfigAck',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<Status>(1, _omitFieldNames ? '' : 'status', enumValues: Status.values)
+    ..aOS(2, _omitFieldNames ? '' : 'detail')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfigAck clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ConfigAck copyWith(void Function(ConfigAck) updates) =>
+      super.copyWith((message) => updates(message as ConfigAck)) as ConfigAck;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ConfigAck create() => ConfigAck._();
+  @$core.override
+  ConfigAck createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ConfigAck getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ConfigAck>(create);
+  static ConfigAck? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  Status get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(Status value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => $_clearField(1);
+
+  /// Human-readable reason when status != OK (host logs it verbatim).
+  @$pb.TagNumber(2)
+  $core.String get detail => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set detail($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDetail() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDetail() => $_clearField(2);
+}
+
+/// The firmware runs the down/move/up state machine and axis transforms; the
+/// host forwards this to Dart untouched. (0,0) on UP.
+class Touch extends $pb.GeneratedMessage {
+  factory Touch({
+    TouchPhase? phase,
+    $core.int? x,
+    $core.int? y,
+  }) {
+    final result = create();
+    if (phase != null) result.phase = phase;
+    if (x != null) result.x = x;
+    if (y != null) result.y = y;
+    return result;
+  }
+
+  Touch._();
+
+  factory Touch.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Touch.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Touch',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<TouchPhase>(1, _omitFieldNames ? '' : 'phase',
+        enumValues: TouchPhase.values)
+    ..aI(2, _omitFieldNames ? '' : 'x', fieldType: $pb.PbFieldType.OU3)
+    ..aI(3, _omitFieldNames ? '' : 'y', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Touch clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Touch copyWith(void Function(Touch) updates) =>
+      super.copyWith((message) => updates(message as Touch)) as Touch;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Touch create() => Touch._();
+  @$core.override
+  Touch createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Touch getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Touch>(create);
+  static Touch? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  TouchPhase get phase => $_getN(0);
+  @$pb.TagNumber(1)
+  set phase(TouchPhase value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPhase() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPhase() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get x => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set x($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasX() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearX() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.int get y => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set y($core.int value) => $_setUnsignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasY() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearY() => $_clearField(3);
+}
+
+class OtaBegin extends $pb.GeneratedMessage {
+  factory OtaBegin({
+    $core.int? imageSize,
+    $core.List<$core.int>? sha256,
+    $core.String? version,
+  }) {
+    final result = create();
+    if (imageSize != null) result.imageSize = imageSize;
+    if (sha256 != null) result.sha256 = sha256;
+    if (version != null) result.version = version;
+    return result;
+  }
+
+  OtaBegin._();
+
+  factory OtaBegin.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OtaBegin.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OtaBegin',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'imageSize', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'sha256', $pb.PbFieldType.OY)
+    ..aOS(3, _omitFieldNames ? '' : 'version')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaBegin clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaBegin copyWith(void Function(OtaBegin) updates) =>
+      super.copyWith((message) => updates(message as OtaBegin)) as OtaBegin;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OtaBegin create() => OtaBegin._();
+  @$core.override
+  OtaBegin createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OtaBegin getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OtaBegin>(create);
+  static OtaBegin? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get imageSize => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set imageSize($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasImageSize() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearImageSize() => $_clearField(1);
+
+  /// SHA-256 of the full image; the device verifies before committing.
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get sha256 => $_getN(1);
+  @$pb.TagNumber(2)
+  set sha256($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSha256() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSha256() => $_clearField(2);
+
+  /// esp_app_desc_t version extracted from the image (log-only on device).
+  @$pb.TagNumber(3)
+  $core.String get version => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set version($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasVersion() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearVersion() => $_clearField(3);
+}
+
+class OtaData extends $pb.GeneratedMessage {
+  factory OtaData({
+    $core.int? seq,
+    $core.List<$core.int>? data,
+  }) {
+    final result = create();
+    if (seq != null) result.seq = seq;
+    if (data != null) result.data = data;
+    return result;
+  }
+
+  OtaData._();
+
+  factory OtaData.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OtaData.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OtaData',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'seq', fieldType: $pb.PbFieldType.OU3)
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'data', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaData clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaData copyWith(void Function(OtaData) updates) =>
+      super.copyWith((message) => updates(message as OtaData)) as OtaData;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OtaData create() => OtaData._();
+  @$core.override
+  OtaData createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OtaData getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OtaData>(create);
+  static OtaData? _defaultInstance;
+
+  /// Chunk index, starting at 0 (detects drops on a desynced stream).
+  @$pb.TagNumber(1)
+  $core.int get seq => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set seq($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasSeq() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearSeq() => $_clearField(1);
+
+  /// Image bytes, at most 8192 per chunk (PV_OTA_CHUNK_MAX).
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get data => $_getN(1);
+  @$pb.TagNumber(2)
+  set data($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasData() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearData() => $_clearField(2);
+}
+
+class OtaEnd extends $pb.GeneratedMessage {
+  factory OtaEnd() => create();
+
+  OtaEnd._();
+
+  factory OtaEnd.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OtaEnd.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OtaEnd',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaEnd clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaEnd copyWith(void Function(OtaEnd) updates) =>
+      super.copyWith((message) => updates(message as OtaEnd)) as OtaEnd;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OtaEnd create() => OtaEnd._();
+  @$core.override
+  OtaEnd createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OtaEnd getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OtaEnd>(create);
+  static OtaEnd? _defaultInstance;
+}
+
+/// Discard a partial transfer (host-side cancel).
+class OtaAbort extends $pb.GeneratedMessage {
+  factory OtaAbort() => create();
+
+  OtaAbort._();
+
+  factory OtaAbort.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OtaAbort.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OtaAbort',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaAbort clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaAbort copyWith(void Function(OtaAbort) updates) =>
+      super.copyWith((message) => updates(message as OtaAbort)) as OtaAbort;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OtaAbort create() => OtaAbort._();
+  @$core.override
+  OtaAbort createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OtaAbort getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OtaAbort>(create);
+  static OtaAbort? _defaultInstance;
+}
+
+class OtaStatus extends $pb.GeneratedMessage {
+  factory OtaStatus({
+    OtaState? state,
+    $core.int? pct,
+    $core.int? err,
+  }) {
+    final result = create();
+    if (state != null) result.state = state;
+    if (pct != null) result.pct = pct;
+    if (err != null) result.err = err;
+    return result;
+  }
+
+  OtaStatus._();
+
+  factory OtaStatus.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory OtaStatus.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'OtaStatus',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<OtaState>(1, _omitFieldNames ? '' : 'state',
+        enumValues: OtaState.values)
+    ..aI(2, _omitFieldNames ? '' : 'pct', fieldType: $pb.PbFieldType.OU3)
+    ..aI(3, _omitFieldNames ? '' : 'err', fieldType: $pb.PbFieldType.OS3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaStatus clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  OtaStatus copyWith(void Function(OtaStatus) updates) =>
+      super.copyWith((message) => updates(message as OtaStatus)) as OtaStatus;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static OtaStatus create() => OtaStatus._();
+  @$core.override
+  OtaStatus createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static OtaStatus getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<OtaStatus>(create);
+  static OtaStatus? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  OtaState get state => $_getN(0);
+  @$pb.TagNumber(1)
+  set state(OtaState value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasState() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearState() => $_clearField(1);
+
+  /// Receive progress, 0–100.
+  @$pb.TagNumber(2)
+  $core.int get pct => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set pct($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasPct() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearPct() => $_clearField(2);
+
+  /// Device-side pv_ota_err code; 0 when state != FAILED.
+  @$pb.TagNumber(3)
+  $core.int get err => $_getIZ(2);
+  @$pb.TagNumber(3)
+  set err($core.int value) => $_setSignedInt32(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasErr() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearErr() => $_clearField(3);
+}
+
+/// Liveness heartbeat. The host sends one at least every second while it holds
+/// the link open.
+class Keepalive extends $pb.GeneratedMessage {
+  factory Keepalive() => create();
+
+  Keepalive._();
+
+  factory Keepalive.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Keepalive.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Keepalive',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Keepalive clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Keepalive copyWith(void Function(Keepalive) updates) =>
+      super.copyWith((message) => updates(message as Keepalive)) as Keepalive;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Keepalive create() => Keepalive._();
+  @$core.override
+  Keepalive createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Keepalive getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Keepalive>(create);
+  static Keepalive? _defaultInstance;
+}
+
+class AuthChallenge extends $pb.GeneratedMessage {
+  factory AuthChallenge({
+    $core.List<$core.int>? nonce,
+  }) {
+    final result = create();
+    if (nonce != null) result.nonce = nonce;
+    return result;
+  }
+
+  AuthChallenge._();
+
+  factory AuthChallenge.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory AuthChallenge.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AuthChallenge',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..a<$core.List<$core.int>>(
+        1, _omitFieldNames ? '' : 'nonce', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AuthChallenge clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AuthChallenge copyWith(void Function(AuthChallenge) updates) =>
+      super.copyWith((message) => updates(message as AuthChallenge))
+          as AuthChallenge;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AuthChallenge create() => AuthChallenge._();
+  @$core.override
+  AuthChallenge createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static AuthChallenge getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AuthChallenge>(create);
+  static AuthChallenge? _defaultInstance;
+
+  /// Fresh random nonce, exactly 32 bytes.
+  @$pb.TagNumber(1)
+  $core.List<$core.int> get nonce => $_getN(0);
+  @$pb.TagNumber(1)
+  set nonce($core.List<$core.int> value) => $_setBytes(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasNonce() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearNonce() => $_clearField(1);
+}
+
+class AuthResponse extends $pb.GeneratedMessage {
+  factory AuthResponse({
+    AuthStatus? status,
+    $core.List<$core.int>? certificate,
+    $core.List<$core.int>? signature,
+  }) {
+    final result = create();
+    if (status != null) result.status = status;
+    if (certificate != null) result.certificate = certificate;
+    if (signature != null) result.signature = signature;
+    return result;
+  }
+
+  AuthResponse._();
+
+  factory AuthResponse.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory AuthResponse.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'AuthResponse',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<AuthStatus>(1, _omitFieldNames ? '' : 'status',
+        enumValues: AuthStatus.values)
+    ..a<$core.List<$core.int>>(
+        2, _omitFieldNames ? '' : 'certificate', $pb.PbFieldType.OY)
+    ..a<$core.List<$core.int>>(
+        3, _omitFieldNames ? '' : 'signature', $pb.PbFieldType.OY)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AuthResponse clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  AuthResponse copyWith(void Function(AuthResponse) updates) =>
+      super.copyWith((message) => updates(message as AuthResponse))
+          as AuthResponse;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static AuthResponse create() => AuthResponse._();
+  @$core.override
+  AuthResponse createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static AuthResponse getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<AuthResponse>(create);
+  static AuthResponse? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  AuthStatus get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(AuthStatus value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => $_clearField(1);
+
+  /// Opaque device certificate: version/device-id/issued-at/expires-at/device-
+  /// pubkey + CA signature (pv_device_cert_t, 157 bytes). Its layout is its own
+  /// versioned format keyed on cert[0] (cert_version), parsed at fixed offsets by
+  /// the host's auth.rs, independent of this schema. The device key and the CA
+  /// that signs the cert are both ECDSA P-256. Empty when status != OK.
+  @$pb.TagNumber(2)
+  $core.List<$core.int> get certificate => $_getN(1);
+  @$pb.TagNumber(2)
+  set certificate($core.List<$core.int> value) => $_setBytes(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasCertificate() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearCertificate() => $_clearField(2);
+
+  /// ECDSA P-256/SHA-256 signature over sha256("PVUS-ATTEST-V2" || nonce ||
+  /// device_pubkey), a 64-byte r||s pair, produced by the device's eFuse ECDSA
+  /// key via the on-chip ECDSA peripheral. Empty when status != OK.
+  @$pb.TagNumber(3)
+  $core.List<$core.int> get signature => $_getN(2);
+  @$pb.TagNumber(3)
+  set signature($core.List<$core.int> value) => $_setBytes(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasSignature() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearSignature() => $_clearField(3);
+}
+
+class GetDeviceInfo extends $pb.GeneratedMessage {
+  factory GetDeviceInfo() => create();
+
+  GetDeviceInfo._();
+
+  factory GetDeviceInfo.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory GetDeviceInfo.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'GetDeviceInfo',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetDeviceInfo clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  GetDeviceInfo copyWith(void Function(GetDeviceInfo) updates) =>
+      super.copyWith((message) => updates(message as GetDeviceInfo))
+          as GetDeviceInfo;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static GetDeviceInfo create() => GetDeviceInfo._();
+  @$core.override
+  GetDeviceInfo createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static GetDeviceInfo getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<GetDeviceInfo>(create);
+  static GetDeviceInfo? _defaultInstance;
+}
+
+class PanelGeometry extends $pb.GeneratedMessage {
+  factory PanelGeometry({
+    $core.int? width,
+    $core.int? height,
+    PanelShape? shape,
+  }) {
+    final result = create();
+    if (width != null) result.width = width;
+    if (height != null) result.height = height;
+    if (shape != null) result.shape = shape;
+    return result;
+  }
+
+  PanelGeometry._();
+
+  factory PanelGeometry.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory PanelGeometry.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'PanelGeometry',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'width', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'height', fieldType: $pb.PbFieldType.OU3)
+    ..aE<PanelShape>(3, _omitFieldNames ? '' : 'shape',
+        enumValues: PanelShape.values)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PanelGeometry clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  PanelGeometry copyWith(void Function(PanelGeometry) updates) =>
+      super.copyWith((message) => updates(message as PanelGeometry))
+          as PanelGeometry;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static PanelGeometry create() => PanelGeometry._();
+  @$core.override
+  PanelGeometry createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static PanelGeometry getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<PanelGeometry>(create);
+  static PanelGeometry? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  $core.int get width => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set width($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasWidth() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearWidth() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.int get height => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set height($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasHeight() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearHeight() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  PanelShape get shape => $_getN(2);
+  @$pb.TagNumber(3)
+  set shape(PanelShape value) => $_setField(3, value);
+  @$pb.TagNumber(3)
+  $core.bool hasShape() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearShape() => $_clearField(3);
+}
+
+/// Lets the app select devices by serial and size its capture surface from the
+/// device instead of the Dart-side kPicoViewModels table.
+class DeviceInfo extends $pb.GeneratedMessage {
+  factory DeviceInfo({
+    $core.String? deviceId,
+    $core.String? serial,
+    $core.String? fwVersion,
+    $core.int? protoVersion,
+    PanelGeometry? panel,
+    Capabilities? caps,
+  }) {
+    final result = create();
+    if (deviceId != null) result.deviceId = deviceId;
+    if (serial != null) result.serial = serial;
+    if (fwVersion != null) result.fwVersion = fwVersion;
+    if (protoVersion != null) result.protoVersion = protoVersion;
+    if (panel != null) result.panel = panel;
+    if (caps != null) result.caps = caps;
+    return result;
+  }
+
+  DeviceInfo._();
+
+  factory DeviceInfo.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory DeviceInfo.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'DeviceInfo',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aOS(1, _omitFieldNames ? '' : 'deviceId')
+    ..aOS(2, _omitFieldNames ? '' : 'serial')
+    ..aOS(3, _omitFieldNames ? '' : 'fwVersion')
+    ..aI(4, _omitFieldNames ? '' : 'protoVersion',
+        fieldType: $pb.PbFieldType.OU3)
+    ..aOM<PanelGeometry>(5, _omitFieldNames ? '' : 'panel',
+        subBuilder: PanelGeometry.create)
+    ..aOM<Capabilities>(6, _omitFieldNames ? '' : 'caps',
+        subBuilder: Capabilities.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeviceInfo clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  DeviceInfo copyWith(void Function(DeviceInfo) updates) =>
+      super.copyWith((message) => updates(message as DeviceInfo)) as DeviceInfo;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static DeviceInfo create() => DeviceInfo._();
+  @$core.override
+  DeviceInfo createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static DeviceInfo getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<DeviceInfo>(create);
+  static DeviceInfo? _defaultInstance;
+
+  /// Factory device id burned in at provisioning (e.g. "PV4-A00123").
+  @$pb.TagNumber(1)
+  $core.String get deviceId => $_getSZ(0);
+  @$pb.TagNumber(1)
+  set deviceId($core.String value) => $_setString(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasDeviceId() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearDeviceId() => $_clearField(1);
+
+  /// USB serial string.
+  @$pb.TagNumber(2)
+  $core.String get serial => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set serial($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasSerial() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearSerial() => $_clearField(2);
+
+  @$pb.TagNumber(3)
+  $core.String get fwVersion => $_getSZ(2);
+  @$pb.TagNumber(3)
+  set fwVersion($core.String value) => $_setString(2, value);
+  @$pb.TagNumber(3)
+  $core.bool hasFwVersion() => $_has(2);
+  @$pb.TagNumber(3)
+  void clearFwVersion() => $_clearField(3);
+
+  @$pb.TagNumber(4)
+  $core.int get protoVersion => $_getIZ(3);
+  @$pb.TagNumber(4)
+  set protoVersion($core.int value) => $_setUnsignedInt32(3, value);
+  @$pb.TagNumber(4)
+  $core.bool hasProtoVersion() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearProtoVersion() => $_clearField(4);
+
+  @$pb.TagNumber(5)
+  PanelGeometry get panel => $_getN(4);
+  @$pb.TagNumber(5)
+  set panel(PanelGeometry value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasPanel() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearPanel() => $_clearField(5);
+  @$pb.TagNumber(5)
+  PanelGeometry ensurePanel() => $_ensure(4);
+
+  @$pb.TagNumber(6)
+  Capabilities get caps => $_getN(5);
+  @$pb.TagNumber(6)
+  set caps(Capabilities value) => $_setField(6, value);
+  @$pb.TagNumber(6)
+  $core.bool hasCaps() => $_has(5);
+  @$pb.TagNumber(6)
+  void clearCaps() => $_clearField(6);
+  @$pb.TagNumber(6)
+  Capabilities ensureCaps() => $_ensure(5);
+}
+
+enum SetParam_Param { brightness, notSet }
+
+class SetParam extends $pb.GeneratedMessage {
+  factory SetParam({
+    $core.int? brightness,
+  }) {
+    final result = create();
+    if (brightness != null) result.brightness = brightness;
+    return result;
+  }
+
+  SetParam._();
+
+  factory SetParam.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory SetParam.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static const $core.Map<$core.int, SetParam_Param> _SetParam_ParamByTag = {
+    1: SetParam_Param.brightness,
+    0: SetParam_Param.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'SetParam',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..oo(0, [1])
+    ..aI(1, _omitFieldNames ? '' : 'brightness', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetParam clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  SetParam copyWith(void Function(SetParam) updates) =>
+      super.copyWith((message) => updates(message as SetParam)) as SetParam;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static SetParam create() => SetParam._();
+  @$core.override
+  SetParam createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static SetParam getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<SetParam>(create);
+  static SetParam? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  SetParam_Param whichParam() => _SetParam_ParamByTag[$_whichOneof(0)]!;
+  @$pb.TagNumber(1)
+  void clearParam() => $_clearField($_whichOneof(0));
+
+  /// Backlight, 0 (off) – 255 (full).
+  @$pb.TagNumber(1)
+  $core.int get brightness => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set brightness($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasBrightness() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearBrightness() => $_clearField(1);
+}
+
+/// The device answers every SetParam with one of these. The host treats SetParam
+/// as fire-and-forget (a UI slider may send them rapidly), so it logs the ack
+/// rather than blocking on it — but the device must still send one.
+class ParamAck extends $pb.GeneratedMessage {
+  factory ParamAck({
+    Status? status,
+    $core.String? detail,
+  }) {
+    final result = create();
+    if (status != null) result.status = status;
+    if (detail != null) result.detail = detail;
+    return result;
+  }
+
+  ParamAck._();
+
+  factory ParamAck.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory ParamAck.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'ParamAck',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aE<Status>(1, _omitFieldNames ? '' : 'status', enumValues: Status.values)
+    ..aOS(2, _omitFieldNames ? '' : 'detail')
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ParamAck clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  ParamAck copyWith(void Function(ParamAck) updates) =>
+      super.copyWith((message) => updates(message as ParamAck)) as ParamAck;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static ParamAck create() => ParamAck._();
+  @$core.override
+  ParamAck createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static ParamAck getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<ParamAck>(create);
+  static ParamAck? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  Status get status => $_getN(0);
+  @$pb.TagNumber(1)
+  set status(Status value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasStatus() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearStatus() => $_clearField(1);
+
+  @$pb.TagNumber(2)
+  $core.String get detail => $_getSZ(1);
+  @$pb.TagNumber(2)
+  set detail($core.String value) => $_setString(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasDetail() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearDetail() => $_clearField(2);
+}
+
+enum Haptics_Cmd { play, stop, notSet }
+
+/// Drive the panel's haptic actuator. Truly fire-and-forget: unlike SetParam
+/// there is no ack message at all (a dropped UI buzz is harmless). `play`
+/// triggers one ROM effect through the DRV2605L waveform sequencer; `stop`
+/// clears a running effect.
+class Haptics extends $pb.GeneratedMessage {
+  factory Haptics({
+    HapticsPlay? play,
+    HapticsStop? stop,
+  }) {
+    final result = create();
+    if (play != null) result.play = play;
+    if (stop != null) result.stop = stop;
+    return result;
+  }
+
+  Haptics._();
+
+  factory Haptics.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory Haptics.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static const $core.Map<$core.int, Haptics_Cmd> _Haptics_CmdByTag = {
+    1: Haptics_Cmd.play,
+    2: Haptics_Cmd.stop,
+    0: Haptics_Cmd.notSet
+  };
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'Haptics',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..oo(0, [1, 2])
+    ..aOM<HapticsPlay>(1, _omitFieldNames ? '' : 'play',
+        subBuilder: HapticsPlay.create)
+    ..aOM<HapticsStop>(2, _omitFieldNames ? '' : 'stop',
+        subBuilder: HapticsStop.create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Haptics clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  Haptics copyWith(void Function(Haptics) updates) =>
+      super.copyWith((message) => updates(message as Haptics)) as Haptics;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static Haptics create() => Haptics._();
+  @$core.override
+  Haptics createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static Haptics getDefault() =>
+      _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<Haptics>(create);
+  static Haptics? _defaultInstance;
+
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  Haptics_Cmd whichCmd() => _Haptics_CmdByTag[$_whichOneof(0)]!;
+  @$pb.TagNumber(1)
+  @$pb.TagNumber(2)
+  void clearCmd() => $_clearField($_whichOneof(0));
+
+  @$pb.TagNumber(1)
+  HapticsPlay get play => $_getN(0);
+  @$pb.TagNumber(1)
+  set play(HapticsPlay value) => $_setField(1, value);
+  @$pb.TagNumber(1)
+  $core.bool hasPlay() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearPlay() => $_clearField(1);
+  @$pb.TagNumber(1)
+  HapticsPlay ensurePlay() => $_ensure(0);
+
+  @$pb.TagNumber(2)
+  HapticsStop get stop => $_getN(1);
+  @$pb.TagNumber(2)
+  set stop(HapticsStop value) => $_setField(2, value);
+  @$pb.TagNumber(2)
+  $core.bool hasStop() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearStop() => $_clearField(2);
+  @$pb.TagNumber(2)
+  HapticsStop ensureStop() => $_ensure(1);
+}
+
+class HapticsPlay extends $pb.GeneratedMessage {
+  factory HapticsPlay({
+    $core.int? effect,
+    $core.int? library,
+  }) {
+    final result = create();
+    if (effect != null) result.effect = effect;
+    if (library != null) result.library = library;
+    return result;
+  }
+
+  HapticsPlay._();
+
+  factory HapticsPlay.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory HapticsPlay.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HapticsPlay',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..aI(1, _omitFieldNames ? '' : 'effect', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'library', fieldType: $pb.PbFieldType.OU3)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HapticsPlay clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HapticsPlay copyWith(void Function(HapticsPlay) updates) =>
+      super.copyWith((message) => updates(message as HapticsPlay))
+          as HapticsPlay;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static HapticsPlay create() => HapticsPlay._();
+  @$core.override
+  HapticsPlay createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static HapticsPlay getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<HapticsPlay>(create);
+  static HapticsPlay? _defaultInstance;
+
+  /// ROM effect id, 1..123 (DRV2605L waveform library; see datasheet Table 12).
+  /// 0 is not a valid effect and is ignored by the device.
+  @$pb.TagNumber(1)
+  $core.int get effect => $_getIZ(0);
+  @$pb.TagNumber(1)
+  set effect($core.int value) => $_setUnsignedInt32(0, value);
+  @$pb.TagNumber(1)
+  $core.bool hasEffect() => $_has(0);
+  @$pb.TagNumber(1)
+  void clearEffect() => $_clearField(1);
+
+  /// ROM library 1..7 to source the effect from; 0 keeps the firmware default
+  /// (LRA library 6). Lets the host pick an ERM/LRA library without a rebuild.
+  @$pb.TagNumber(2)
+  $core.int get library => $_getIZ(1);
+  @$pb.TagNumber(2)
+  set library($core.int value) => $_setUnsignedInt32(1, value);
+  @$pb.TagNumber(2)
+  $core.bool hasLibrary() => $_has(1);
+  @$pb.TagNumber(2)
+  void clearLibrary() => $_clearField(2);
+}
+
+class HapticsStop extends $pb.GeneratedMessage {
+  factory HapticsStop() => create();
+
+  HapticsStop._();
+
+  factory HapticsStop.fromBuffer($core.List<$core.int> data,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromBuffer(data, registry);
+  factory HapticsStop.fromJson($core.String json,
+          [$pb.ExtensionRegistry registry = $pb.ExtensionRegistry.EMPTY]) =>
+      create()..mergeFromJson(json, registry);
+
+  static final $pb.BuilderInfo _i = $pb.BuilderInfo(
+      _omitMessageNames ? '' : 'HapticsStop',
+      package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.wire'),
+      createEmptyInstance: create)
+    ..hasRequiredFields = false;
+
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HapticsStop clone() => deepCopy();
+  @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
+  HapticsStop copyWith(void Function(HapticsStop) updates) =>
+      super.copyWith((message) => updates(message as HapticsStop))
+          as HapticsStop;
+
+  @$core.override
+  $pb.BuilderInfo get info_ => _i;
+
+  @$core.pragma('dart2js:noInline')
+  static HapticsStop create() => HapticsStop._();
+  @$core.override
+  HapticsStop createEmptyInstance() => create();
+  @$core.pragma('dart2js:noInline')
+  static HapticsStop getDefault() => _defaultInstance ??=
+      $pb.GeneratedMessage.$_defaultFor<HapticsStop>(create);
+  static HapticsStop? _defaultInstance;
+}
+
+const $core.bool _omitFieldNames =
+    $core.bool.fromEnvironment('protobuf.omit_field_names');
+const $core.bool _omitMessageNames =
+    $core.bool.fromEnvironment('protobuf.omit_message_names');
