@@ -53,7 +53,7 @@ class PicoViewController {
   void init() {}
 
   /// Records [config] for geometry; opens nothing.
-  void open(PicoViewConfig config) {
+  Future<void> open(PicoViewConfig config) async {
     _config = config;
   }
 
@@ -61,26 +61,29 @@ class PicoViewController {
   bool flushRgba(Uint8List rgba, int width, int height) => false;
 
   /// Always returns false on web.
-  bool setBrightness(int level) => false;
+  Future<bool> setBrightness(int level) async => false;
 
   /// Always returns false on web.
-  bool playHaptic(int effect, {int library = 0}) => false;
+  Future<bool> playHaptic(int effect, {int library = 0}) async => false;
 
   /// Always returns false on web.
-  bool stopHaptic() => false;
+  Future<bool> stopHaptic() async => false;
 
   /// Always throws [PicoViewException] on web — there is no device to ask.
-  PicoDeviceInfo getDeviceInfo() {
+  Future<PicoDeviceInfo> getDeviceInfo() {
     throw PicoViewException('device info is not available on web');
   }
 
   /// Always throws [PicoViewException] on web.
-  void otaStart(Uint8List image) {
+  Future<void> otaStart(Uint8List image) {
     throw PicoViewException('firmware update is not supported on web');
   }
 
   /// Close the stream controllers. Safe to call multiple times.
-  void dispose() {
+  Future<void> dispose() async => disposeSync();
+
+  /// Close the stream controllers without awaiting. Safe to call multiple times.
+  void disposeSync() {
     _touch.close();
     _link.close();
     _ota.close();

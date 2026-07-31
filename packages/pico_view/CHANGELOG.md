@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.4.0
+
+### Device calls no longer block the calling isolate
+
+`pv_request` used to answer in-band, so a call sat on the caller's thread until
+the engine was done — up to ten seconds for `open` with no panel attached, which
+froze the UI. It now hands the request over and returns; the answer is posted to
+the `pv_init` SendPort as a `PvResponse` carrying the `id` its request was sent
+with, and the controller completes the matching `Future`.
+
 ## 0.3.0
 
 First published release.

@@ -1,15 +1,18 @@
 // pico-view FFI control plane — the Dart <-> Rust boundary.
 //
-// The C ABI is frozen at five functions:
+// The C ABI is frozen at four functions:
 //
-//   pv_init(api_data, send_port)                          — once, at startup
-//   pv_request(req, req_len, &resp, &resp_len) -> int32   — PvRequest in, PvResponse out
-//   pv_free(ptr, len)                                     — free a pv_request response
-//   pv_lcd_flush(rgba, len, w, h) -> int32                — hot path, stays raw
-//   pv_close() -> int32                                   — tear down
+//   pv_init(api_data, send_port)             — once, at startup
+//   pv_request(req, req_len) -> int32        — accept one PvRequest, answer later
+//   pv_lcd_flush(rgba, len, w, h) -> int32   — hot path, stays raw
+//   pv_close() -> int32                      — blocking tear-down
 //
-// pv_request returns 0 whenever a PvResponse was produced (including an
-// `error` response); nonzero only for transport-level failure.
+// pv_request never blocks on the device: it returns as soon as the request has
+// been accepted (0) or found undecodable (-1). The answer arrives later on the
+// pv_init SendPort as a PvEvent carrying a PvResponse whose `id` echoes the
+// request's — so the caller correlates the two itself. Every accepted request
+// is answered exactly once, including on timeout, so a caller waiting on an id
+// is never left hanging.
 //
 // Device-originated payloads reuse the wire messages (picoview.wire.*) so the
 // Rust layer forwards them without re-mapping.
@@ -23,10 +26,20 @@ import "pv_wire.proto";
 // --- Requests ------------------------------------------------------------------
 
 message PvRequest {
+  // Correlation id, echoed on the matching PvResponse. Callers pick it (a
+  // per-controller counter is enough — the engine only ever hands it back).
+  // 0 means "no answer wanted": the request still runs, but nothing is posted.
+  uint32 id = 1;
+  // How long the engine may spend before answering ERROR_CODE_TIMEOUT.
+  // 0 = the engine's default for this variant. Clamped to REQUEST_TIMEOUT_MAX.
+  // Only meaningful for the variants that round-trip (open_device,
+  // close_device, get_device_info); the rest answer immediately.
+  uint32 timeout_ms = 2;
+
   oneof req {
-    OpenDevice open_device = 1;
-    CloseDevice close_device = 2;
-    OtaStart ota_start = 3;
+    OpenDevice open_device = 3;
+    CloseDevice close_device = 4;
+    OtaStart ota_start = 5;
 
     // Forwarded to the device.
     picoview.wire.GetDeviceInfo get_device_info = 16;
@@ -35,10 +48,10 @@ message PvRequest {
   }
 }
 
-// Open the panel device and start a session. Request/reply: responds `ack` once
-// the device is open and the panel initialized, ERROR_CODE_DEVICE when that
-// fails, or ERROR_CODE_TIMEOUT if the worker did not get to it in time. A
-// LinkEvent(CONNECTED) is posted alongside the `ack`.
+// Open the panel device and start a session. Round-trips: the `ack` is posted
+// once the device is open and the panel initialized (up to ~10s), or
+// ERROR_CODE_DEVICE when that fails, or ERROR_CODE_TIMEOUT if the worker did
+// not get to it in time. A LinkEvent(CONNECTED) is posted alongside the `ack`.
 message OpenDevice {
   // Nth enumerated device matching the pico-view VID/PID (ignored when `serial` is set).
   uint32 index = 1;
@@ -48,22 +61,28 @@ message OpenDevice {
   string serial = 3;
 }
 
-// Stop the worker and close the device. Responds `ack` after teardown completes.
+// Stop the worker and close the device. Round-trips: the `ack` is posted after
+// teardown completes. Idempotent.
 message CloseDevice {}
 
-// Stream a signed ESP-IDF app image to the device and commit it. Responds
-// `ack` once enqueued; progress/result arrive as wire.OtaStatus events.
+// Stream a signed ESP-IDF app image to the device and commit it. The `ack` is
+// posted as soon as the transfer is *enqueued*; progress and the result arrive
+// later as wire.OtaStatus events.
 message OtaStart {
   bytes image = 1;
 }
 
 // --- Responses -------------------------------------------------------------------
 
+// The answer to one PvRequest, delivered as a PvEvent on the pv_init SendPort.
 message PvResponse {
+  // Echoes PvRequest.id, so the caller knows which request this answers.
+  uint32 id = 1;
+
   oneof resp {
-    Ack ack = 1;
-    Error error = 2;
-    picoview.wire.DeviceInfo device_info = 3;
+    Ack ack = 2;
+    Error error = 3;
+    picoview.wire.DeviceInfo device_info = 4;
   }
 }
 
@@ -125,5 +144,7 @@ message PvEvent {
     picoview.wire.Touch touch = 1;
     LinkEvent link = 2;
     picoview.wire.OtaStatus ota = 3;
+    // The answer to an earlier pv_request; match it on PvResponse.id.
+    PvResponse response = 4;
   }
 }

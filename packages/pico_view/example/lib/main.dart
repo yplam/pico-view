@@ -48,17 +48,21 @@ class _ClockPageState extends State<ClockPage> {
     _linkSub = _controller.linkStates.listen((state) {
       if (mounted) setState(() => _link = state);
     });
+    unawaited(_open());
+  }
+
+  Future<void> _open() async {
     try {
-      _controller.open(const PicoViewConfig());
+      await _controller.open(const PicoViewConfig());
     } on PicoViewException catch (e) {
-      _openError = e.message;
+      if (mounted) setState(() => _openError = e.message);
     }
   }
 
   @override
   void dispose() {
     _linkSub?.cancel();
-    _controller.dispose();
+    _controller.disposeSync();
     super.dispose();
   }
 

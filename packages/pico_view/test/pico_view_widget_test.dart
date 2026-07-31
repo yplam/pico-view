@@ -81,10 +81,23 @@ void main() {
   });
 
   testWidgets('device calls are no-ops while closed', (tester) async {
-    expect(controller.setBrightness(200), isFalse);
-    expect(controller.playHaptic(47), isFalse);
-    expect(controller.stopHaptic(), isFalse);
+    // They short-circuit before touching FFI, so these complete without a
+    // native library ever being loaded.
+    expect(await controller.setBrightness(200), isFalse);
+    expect(await controller.playHaptic(47), isFalse);
+    expect(await controller.stopHaptic(), isFalse);
     expect(controller.linkState, PicoLinkState.disconnected);
     expect(controller.firmwareVersion, isNull);
+  });
+
+  testWidgets('getDeviceInfo while closed reports it rather than hanging', (
+    tester,
+  ) async {
+    // No device, so this must reject up front — never wait on a response that
+    // the engine was never asked for.
+    await expectLater(
+      controller.getDeviceInfo(),
+      throwsA(isA<PicoViewException>()),
+    );
   });
 }

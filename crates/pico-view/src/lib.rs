@@ -5,15 +5,14 @@
 //! `pv_lcd_flush`, a single worker thread diffs each frame and streams the
 //! changed regions to a [`transport::Transport`], and everything else travels through
 //! one generic `pv_request` call carrying protobuf messages.
-//! Engine events flow back over a Dart `SendPort` as encoded `PvEvent` messages.
+//! Engine events *and* request answers flow back over a Dart `SendPort` as
+//! encoded `PvEvent` messages.
 //!
 //! ## FFI contract
 //! - `pv_init(api_data, send_port)` — once, at startup.
-//! - `pv_request(req, req_len, &resp, &resp_len)` — one encoded
-//!   `picoview.ffi.PvRequest` in, one encoded `PvResponse` out.
-//! - `pv_free(ptr, len)` — release a `pv_request` response buffer.
+//! - `pv_request(req, req_len)` — accept one encoded `picoview.ffi.PvRequest`.
 //! - `pv_lcd_flush(rgba_ptr, len, w, h)` — push one RGBA8888 frame.
-//! - `pv_close()` — tear down.
+//! - `pv_close()` — tear down (blocking).
 
 mod auth;
 mod config;
@@ -32,6 +31,7 @@ use prost::Message;
 use proto::ffi::{pv_request, pv_response, Ack, Error, ErrorCode, PvRequest, PvResponse};
 use std::sync::atomic::Ordering;
 use std::sync::{Once, OnceLock};
+use std::time::Duration;
 use worker::{Cmd, CmdError, Engine, ReqError};
 
 pub use auth::open_for_check;
@@ -64,12 +64,30 @@ fn init_logging() {
 }
 
 
+/// Upper bound on a caller-supplied `timeout_ms`, so a bad value can't pin a
+/// scratch thread (and a Dart `Future`) for the life of the process.
+const REQUEST_TIMEOUT_MAX: Duration = Duration::from_secs(10);
+
+/// Resolve a request's `timeout_ms` against the default for its variant.
+/// `0` means "use the default"; anything else is clamped to
+/// [`REQUEST_TIMEOUT_MAX`].
+fn deadline(timeout_ms: u32, default: Duration) -> Duration {
+    if timeout_ms == 0 {
+        default
+    } else {
+        Duration::from_millis(timeout_ms as u64).min(REQUEST_TIMEOUT_MAX)
+    }
+}
+
+/// Responses are built without an id; [`post::post_response`] stamps in the one
+/// the request carried.
 fn ack() -> PvResponse {
-    PvResponse { resp: Some(pv_response::Resp::Ack(Ack {})) }
+    PvResponse { id: 0, resp: Some(pv_response::Resp::Ack(Ack {})) }
 }
 
 fn err(code: ErrorCode, message: impl Into<String>) -> PvResponse {
     PvResponse {
+        id: 0,
         resp: Some(pv_response::Resp::Error(Error { code: code as i32, message: message.into() })),
     }
 }
@@ -97,8 +115,43 @@ fn req_err(e: ReqError, what: &str) -> PvResponse {
     }
 }
 
+/// Whether a request has to round-trip to the device — and so must not run on
+/// the caller's thread. The rest are validation plus a channel send.
+fn is_blocking(req: &Option<pv_request::Req>) -> bool {
+    use pv_request::Req;
+    matches!(
+        req,
+        Some(Req::OpenDevice(_)) | Some(Req::CloseDevice(_)) | Some(Req::GetDeviceInfo(_))
+    )
+}
+
+/// Route one decoded request to wherever it can safely run, and post its answer
+/// when it lands. See the module docs for why this is split.
+fn dispatch(request: PvRequest) {
+    let PvRequest { id, timeout_ms, req } = request;
+
+    if !is_blocking(&req) {
+        post::post_response(id, handle_request(req, timeout_ms));
+        return;
+    }
+
+    // A scratch thread per round-trip. These are rare and user-initiated (open,
+    // close, "what device is this?"), so a thread each is cheaper.
+    let spawned = std::thread::Builder::new()
+        .name("pv-request".into())
+        .spawn(move || post::post_response(id, handle_request(req, timeout_ms)));
+
+    if let Err(e) = spawned {
+        log::error!("pv_request: could not spawn a thread for the request: {e}");
+        post::post_response(id, err(ErrorCode::Internal, format!("thread spawn failed: {e}")));
+    }
+}
+
 /// Execute one decoded control-plane request. Every arm produces a `PvResponse`.
-fn handle_request(req: Option<pv_request::Req>) -> PvResponse {
+///
+/// `timeout_ms` is the caller's deadline for the arms that round-trip; `0`
+/// leaves each one on its own default (see [`deadline`]).
+fn handle_request(req: Option<pv_request::Req>, timeout_ms: u32) -> PvResponse {
     use pv_request::Req;
     match req {
         // Dart package is newer than this native library and sent a variant we don't know.
@@ -106,9 +159,9 @@ fn handle_request(req: Option<pv_request::Req>) -> PvResponse {
             ErrorCode::Unsupported,
             "unknown request variant (Dart package newer than native library?)",
         ),
-        Some(Req::OpenDevice(open)) => open_device(open),
+        Some(Req::OpenDevice(open)) => open_device(open, deadline(timeout_ms, worker::OPEN_TIMEOUT)),
         Some(Req::CloseDevice(_)) => {
-            close_device();
+            close_device(deadline(timeout_ms, worker::CLOSE_TIMEOUT));
             ack()
         }
         Some(Req::OtaStart(ota)) => {
@@ -127,12 +180,14 @@ fn handle_request(req: Option<pv_request::Req>) -> PvResponse {
             ),
         },
         Some(Req::Haptics(h)) => enqueue(Cmd::Haptics(h)),
-        Some(Req::GetDeviceInfo(_)) => get_device_info(),
+        Some(Req::GetDeviceInfo(_)) => {
+            get_device_info(deadline(timeout_ms, worker::DEVICE_INFO_TIMEOUT))
+        }
     }
 }
 
 /// Open the ESP32-P4 device and start a session.
-fn open_device(open: ffi::OpenDevice) -> PvResponse {
+fn open_device(open: ffi::OpenDevice, timeout: Duration) -> PvResponse {
     let mut cfg = PicoViewConfig { index: open.index, ..PicoViewConfig::default() };
     if !open.serial.is_empty() {
         cfg.serial = Some(open.serial);
@@ -154,7 +209,7 @@ fn open_device(open: ffi::OpenDevice) -> PvResponse {
         Ok(e) => e,
         Err(resp) => return resp,
     };
-    match engine.request(|reply| Cmd::Open { cfg, panel, reply }, worker::OPEN_TIMEOUT) {
+    match engine.request(|reply| Cmd::Open { cfg, panel, reply }, timeout) {
         Ok(Ok(())) => ack(),
         Ok(Err(e)) => {
             log::error!("open_device: {e}");
@@ -165,13 +220,13 @@ fn open_device(open: ffi::OpenDevice) -> PvResponse {
 }
 
 /// Query the open device for its `DeviceInfo`
-fn get_device_info() -> PvResponse {
+fn get_device_info(timeout: Duration) -> PvResponse {
     let engine = match engine_or_err() {
         Ok(e) => e,
         Err(resp) => return resp,
     };
-    match engine.request(Cmd::GetDeviceInfo, worker::DEVICE_INFO_TIMEOUT) {
-        Ok(Ok(info)) => PvResponse { resp: Some(pv_response::Resp::DeviceInfo(info)) },
+    match engine.request(Cmd::GetDeviceInfo, timeout) {
+        Ok(Ok(info)) => PvResponse { id: 0, resp: Some(pv_response::Resp::DeviceInfo(info)) },
         Ok(Err(e)) => cmd_err(e),
         Err(e) => req_err(e, "get_device_info"),
     }
@@ -193,12 +248,12 @@ fn enqueue(cmd: Cmd) -> PvResponse {
 }
 
 /// End the session and close the device.
-fn close_device() {
+fn close_device(timeout: Duration) {
     let Some(engine) = ENGINE.get().and_then(Option::as_ref) else {
         return;
     };
     engine.cancel();
-    if let Err(e) = engine.request(Cmd::Close, worker::CLOSE_TIMEOUT) {
+    if let Err(e) = engine.request(Cmd::Close, timeout) {
         log::warn!("close_device: {e}");
     }
 }
@@ -222,43 +277,30 @@ pub unsafe extern "C" fn pv_init(api_data: *mut core::ffi::c_void, send_port: i6
     0
 }
 
-/// Handle one control-plane request: decode `req_len` bytes at `req_ptr` as a
-/// `picoview.ffi.PvRequest`, execute it, and return the encoded `PvResponse`
-/// through `resp_out`/`resp_len_out` (the caller owns the buffer and MUST
-/// release it with `pv_free`).
+/// Accept one control-plane request: decode `req_len` bytes at `req_ptr` as a
+/// `picoview.ffi.PvRequest` and start executing it.
+///
+/// Returns as soon as the request is accepted — it does **not** wait for the
+/// device. The `PvResponse` is posted to the `pv_init` SendPort once the
+/// request completes, carrying the same `id` the request did.
+///
+/// Returns `0` when the request was accepted (an answer is coming, provided
+/// `id` was nonzero), `-1` when it could not be decoded (no answer is coming).
 #[unsafe(no_mangle)]
-pub unsafe extern "C" fn pv_request(
-    req_ptr: *const u8,
-    req_len: usize,
-    resp_out: *mut *mut u8,
-    resp_len_out: *mut usize,
-) -> i32 {
-    if req_ptr.is_null() || resp_out.is_null() || resp_len_out.is_null() {
+pub unsafe extern "C" fn pv_request(req_ptr: *const u8, req_len: usize) -> i32 {
+    if req_ptr.is_null() {
         return -1;
     }
     let bytes = unsafe { std::slice::from_raw_parts(req_ptr, req_len) };
-    let req = match PvRequest::decode(bytes) {
-        Ok(r) => r,
+    match PvRequest::decode(bytes) {
+        Ok(req) => {
+            dispatch(req);
+            0
+        }
         Err(e) => {
             log::error!("pv_request: undecodable request ({} bytes): {e}", req_len);
-            return -1;
+            -1
         }
-    };
-
-    let buf = handle_request(req.req).encode_to_vec().into_boxed_slice();
-    let len = buf.len();
-    unsafe {
-        *resp_out = Box::into_raw(buf) as *mut u8;
-        *resp_len_out = len;
-    }
-    0
-}
-
-/// Free a response buffer returned by `pv_request`.
-#[unsafe(no_mangle)]
-pub unsafe extern "C" fn pv_free(ptr: *mut u8, len: usize) {
-    if !ptr.is_null() {
-        drop(unsafe { Box::from_raw(std::ptr::slice_from_raw_parts_mut(ptr, len)) });
     }
 }
 
@@ -291,10 +333,10 @@ pub unsafe extern "C" fn pv_lcd_flush(
     }
 }
 
-/// Stop the worker and close the device.
+/// Stop the worker and close the device, blocking until it is torn down.
 #[unsafe(no_mangle)]
 pub unsafe extern "C" fn pv_close() -> i32 {
-    close_device();
+    close_device(worker::CLOSE_TIMEOUT);
     0
 }
 
@@ -311,42 +353,89 @@ mod tests {
 
     #[test]
     fn empty_request_is_unsupported() {
-        let e = error_of(handle_request(None));
+        let e = error_of(handle_request(None, 0));
         assert_eq!(e.code, ErrorCode::Unsupported as i32);
     }
 
     #[test]
     fn unknown_model_is_bad_request() {
-        let e = error_of(handle_request(Some(pv_request::Req::OpenDevice(ffi::OpenDevice {
-            index: 0,
-            model: "no-such-panel".into(),
-            serial: String::new(),
-        }))));
+        let e = error_of(handle_request(
+            Some(pv_request::Req::OpenDevice(ffi::OpenDevice {
+                index: 0,
+                model: "no-such-panel".into(),
+                serial: String::new(),
+            })),
+            0,
+        ));
         assert_eq!(e.code, ErrorCode::BadRequest as i32);
         assert!(e.message.contains("no-such-panel"), "{}", e.message);
     }
 
     #[test]
     fn device_commands_without_device_are_not_open() {
-        let e = error_of(handle_request(Some(pv_request::Req::OtaStart(ffi::OtaStart {
-            image: vec![0u8; 4],
-        }))));
+        let e = error_of(handle_request(
+            Some(pv_request::Req::OtaStart(ffi::OtaStart { image: vec![0u8; 4] })),
+            0,
+        ));
         assert_eq!(e.code, ErrorCode::NotOpen as i32);
     }
 
     #[test]
     fn empty_ota_image_is_bad_request() {
-        let e = error_of(handle_request(Some(pv_request::Req::OtaStart(ffi::OtaStart {
-            image: vec![],
-        }))));
+        let e = error_of(handle_request(
+            Some(pv_request::Req::OtaStart(ffi::OtaStart { image: vec![] })),
+            0,
+        ));
         assert_eq!(e.code, ErrorCode::BadRequest as i32);
     }
 
     #[test]
     fn get_device_info_without_device_is_not_open() {
-        let e = error_of(handle_request(Some(pv_request::Req::GetDeviceInfo(
-            wire::GetDeviceInfo {},
-        ))));
+        let e = error_of(handle_request(
+            Some(pv_request::Req::GetDeviceInfo(wire::GetDeviceInfo {})),
+            0,
+        ));
         assert_eq!(e.code, ErrorCode::NotOpen as i32);
+    }
+
+    // --- request routing -------------------------------------------------------
+
+    #[test]
+    fn only_device_round_trips_leave_the_callers_thread() {
+        // The split that keeps `pv_request` off the UI thread: exactly the
+        // three variants that wait on the device get a thread of their own.
+        assert!(is_blocking(&Some(pv_request::Req::OpenDevice(ffi::OpenDevice::default()))));
+        assert!(is_blocking(&Some(pv_request::Req::CloseDevice(ffi::CloseDevice {}))));
+        assert!(is_blocking(&Some(pv_request::Req::GetDeviceInfo(wire::GetDeviceInfo {}))));
+
+        assert!(!is_blocking(&Some(pv_request::Req::OtaStart(ffi::OtaStart::default()))));
+        assert!(!is_blocking(&Some(pv_request::Req::SetParam(wire::SetParam::default()))));
+        assert!(!is_blocking(&Some(pv_request::Req::Haptics(wire::Haptics::default()))));
+        // An unknown variant is a rejection, and rejections answer inline.
+        assert!(!is_blocking(&None));
+    }
+
+    #[test]
+    fn zero_timeout_keeps_the_per_variant_default() {
+        assert_eq!(deadline(0, worker::OPEN_TIMEOUT), worker::OPEN_TIMEOUT);
+        assert_eq!(deadline(0, worker::DEVICE_INFO_TIMEOUT), worker::DEVICE_INFO_TIMEOUT);
+    }
+
+    #[test]
+    fn caller_timeout_overrides_the_default_but_is_capped() {
+        assert_eq!(deadline(250, worker::OPEN_TIMEOUT), Duration::from_millis(250));
+        // A caller can shorten *or* lengthen the default...
+        assert_eq!(deadline(30_000, worker::DEVICE_INFO_TIMEOUT), Duration::from_secs(30));
+        // ...but never past the cap, so a bad value can't pin a thread forever.
+        assert_eq!(deadline(u32::MAX, worker::OPEN_TIMEOUT), REQUEST_TIMEOUT_MAX);
+    }
+
+    #[test]
+    fn a_response_carries_the_id_of_the_request_it_answers() {
+        // What the whole correlation scheme rests on: `post_response` stamps
+        // the request's id onto an answer that was built without one.
+        let answered = PvResponse { id: 7, ..ack() };
+        assert_eq!(answered.id, 7);
+        assert!(matches!(answered.resp, Some(pv_response::Resp::Ack(_))));
     }
 }

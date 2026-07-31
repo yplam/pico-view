@@ -1,12 +1,13 @@
 //! Rust → Dart push channel.
 //!
-//! Engine events (touch, link transitions, OTA progress) are encoded as one
-//! `picoview.ffi.PvEvent` protobuf message each and posted to the stored
-//! `SendPort` as a `kTypedData`/`Uint8` `Dart_CObject` via `Dart_PostCObject_DL`
-//! (arriving in Dart as a `Uint8List`). Dart copies the bytes synchronously
-//! during the post, so no finalizer / owned buffer is needed on our side.
+//! Engine events (touch, link transitions, OTA progress) *and* the answers to
+//! `pv_request` calls are encoded as one `picoview.ffi.PvEvent` protobuf
+//! message each and posted to the stored `SendPort` as a `kTypedData`/`Uint8`
+//! `Dart_CObject` via `Dart_PostCObject_DL` (arriving in Dart as a
+//! `Uint8List`). Dart copies the bytes synchronously during the post, so no
+//! finalizer / owned buffer is needed on our side.
 
-use crate::proto::ffi::{pv_event, LinkEvent, LinkState, PvEvent};
+use crate::proto::ffi::{pv_event, LinkEvent, LinkState, PvEvent, PvResponse};
 use crate::proto::wire::{OtaState, OtaStatus, Touch, TouchPhase};
 use crate::transport::DeviceIdentity;
 use dart_sys::{
@@ -44,6 +45,16 @@ pub fn post_event(event: pv_event::Event) {
             post_fn(port, &mut obj);
         }
     }
+}
+
+/// Post the answer to one `pv_request`, tagged with the id that request
+/// carried so the caller can match it up. `id == 0` means the caller asked for
+/// no answer, so nothing is posted.
+pub fn post_response(id: u32, resp: PvResponse) {
+    if id == 0 {
+        return;
+    }
+    post_event(pv_event::Event::Response(PvResponse { id, ..resp }));
 }
 
 /// Post one touch event (in LCD pixel coordinates).

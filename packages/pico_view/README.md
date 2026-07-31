@@ -10,7 +10,7 @@ over a driverless USB link**; the display/touch engine is Rust and Flutter talks
 import 'package:pico_view/pico_view.dart';
 
 final controller = PicoViewController()..init();
-controller.open(const PicoViewConfig()); // default model: st77916-round-360
+await controller.open(const PicoViewConfig()); // default model: st77916-round-360
 
 // Anywhere in your tree:
 PicoView(
@@ -18,6 +18,12 @@ PicoView(
   child: const MyDashboard(),
 );
 ```
+
+Every device call is asynchronous. `open` waits for the panel to come up (up to
+~10s when nothing is attached) and the others round-trip or queue through the
+engine, but the waiting happens on the engine's own thread — awaiting them never
+stalls your isolate. Frame delivery is the exception: `flushRgba` stays
+synchronous because `PicoView` calls it once per repaint.
 
 The child is laid out at exactly the panel's logical resolution
 (`controller.config.width` × `.height` — e.g. 360×360 for the round panel), so a
@@ -82,10 +88,17 @@ though the panel is plugged in and enumerated.
 
 ## FFI surface & bindings
 
-The C ABI is frozen at five functions in `src/pico_view.h`; everything except the
+The C ABI is frozen at four functions in `src/pico_view.h`; everything except the
 raw-frame hot path (`pv_lcd_flush`) travels as **protobuf messages** whose schemas
-live at the repo root under `proto/`. Two kinds of generated Dart bindings back
-this:
+live at the repo root under `proto/`.
+
+`pv_request` hands a request over and returns — it never waits on the device.
+Each request carries an `id`, and the engine posts the answering `PvResponse` to
+the `pv_init` SendPort alongside the touch/link/OTA events; `PicoViewController`
+keeps a `Completer` per outstanding id and completes the matching `Future`. That
+is what keeps a 10-second `open` off the calling isolate.
+
+Two kinds of generated Dart bindings back this:
 
 - the C-symbol bindings, regenerated when `src/pico_view.h` changes:
 

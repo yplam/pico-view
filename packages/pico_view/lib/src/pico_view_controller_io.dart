@@ -2,9 +2,17 @@
 /// event channel) for the native pico_view bridge.
 ///
 /// The control plane is protobuf over one generic call: requests are encoded
-/// `PvRequest` messages through `pv_request`, and engine events (touch, link
-/// state, OTA progress) arrive on the `pv_init` SendPort as encoded `PvEvent`
-/// bytes. Only frame delivery (`pv_lcd_flush`) bypasses the message channel.
+/// `PvRequest` messages through `pv_request`, and everything the engine sends
+/// back — touch, link state and OTA progress, plus the `PvResponse` answering
+/// each request — arrives on the `pv_init` SendPort as encoded `PvEvent` bytes.
+/// Only frame delivery (`pv_lcd_flush`) bypasses the message channel.
+///
+/// `pv_request` returns as soon as the engine accepts a request, so opening a
+/// device never parks the calling isolate on USB. Each request carries an `id`
+/// that its response echoes; [PicoViewController] keeps a [Completer] per
+/// outstanding id and completes the matching [Future] when the answer lands.
+/// That is why every device call here is asynchronous — [PicoViewController.flushRgba]
+/// excepted, which stays synchronous because it is the per-frame hot path.
 library;
 
 import 'dart:async';
@@ -35,6 +43,28 @@ class PicoViewController {
   bool _initialized = false;
   bool _opened = false;
   bool _disposed = false;
+
+  /// Outstanding requests, keyed by the `id` their response will carry.
+  final Map<int, Completer<pb.PvResponse>> _pending = {};
+
+  /// Next request id. Starts at 1 because 0 means "no answer wanted" on the
+  /// native side; wraps well before it could collide with a live request.
+  int _nextId = 1;
+
+  /// How long to wait for a response beyond the engine's own deadline. The
+  /// engine always answers — timeouts included — so this only catches a
+  /// response that was never posted at all (an engine crash, a closed port).
+  static const Duration _responseGrace = Duration(seconds: 5);
+
+  /// Deadlines sent to the engine as `PvRequest.timeout_ms` for the three
+  /// requests that round-trip to the device. Passing them explicitly (rather
+  /// than sending 0 and inheriting the engine's own defaults) keeps the wait
+  /// this side is prepared for and the wait the engine enforces in step —
+  /// these mirror `OPEN_TIMEOUT`, `CLOSE_TIMEOUT` and `DEVICE_INFO_TIMEOUT` in
+  /// the engine's `worker.rs`.
+  static const Duration _openTimeout = Duration(seconds: 10);
+  static const Duration _closeTimeout = Duration(seconds: 5);
+  static const Duration _deviceInfoTimeout = Duration(seconds: 2);
 
   PicoLinkState _linkState = PicoLinkState.disconnected;
 
@@ -113,34 +143,58 @@ class PicoViewController {
     _initialized = true;
   }
 
-  /// Send one encoded control-plane request and decode the response. Throws
-  /// [PicoViewException] only when the native side produced no response at all
-  pb.PvResponse _request(pb.PvRequest req) {
+  /// Send one encoded control-plane request and await its response.
+  ///
+  /// The native call only *accepts* the request; the answer arrives later on
+  /// the SendPort tagged with the id assigned here, and [_onMessage] completes
+  /// the future. Throws [PicoViewException] when the request could not be
+  /// handed over at all, or when no answer arrived in time.
+  ///
+  /// [engineTimeout] is the deadline the engine is asked to enforce, for the
+  /// requests that round-trip to the device; leave it null for the ones that
+  /// answer immediately.
+  Future<pb.PvResponse> _request(pb.PvRequest req, {Duration? engineTimeout}) {
+    if (_disposed) {
+      throw PicoViewException('controller disposed', code: -1);
+    }
+    if (!_initialized) init();
+
+    final id = _nextId;
+    // Skip 0 on wrap: the engine reads it as "run this, answer nobody".
+    _nextId = _nextId == 0xFFFFFFFF ? 1 : _nextId + 1;
+    req.id = id;
+    if (engineTimeout != null) {
+      req.timeoutMs = engineTimeout.inMilliseconds;
+    }
+
     final reqBytes = req.writeToBuffer();
     final reqPtr = malloc.allocate<ffi.Uint8>(reqBytes.length);
-    final respPtr = malloc.allocate<ffi.Pointer<ffi.Uint8>>(
-      ffi.sizeOf<ffi.Pointer<ffi.Uint8>>(),
-    );
-    final respLen = malloc.allocate<ffi.UintPtr>(ffi.sizeOf<ffi.UintPtr>());
+    final completer = Completer<pb.PvResponse>();
+    _pending[id] = completer;
     try {
       reqPtr.asTypedList(reqBytes.length).setAll(0, reqBytes);
-      final rc = bindings.pv_request(reqPtr, reqBytes.length, respPtr, respLen);
+      final rc = bindings.pv_request(reqPtr, reqBytes.length);
       if (rc != 0) {
-        throw PicoViewException('pv_request failed (code $rc)', code: rc);
-      }
-      final ptr = respPtr.value;
-      final len = respLen.value;
-      try {
-        // Parsing copies out of the native buffer, so it can be freed after.
-        return pb.PvResponse.fromBuffer(ptr.asTypedList(len));
-      } finally {
-        bindings.pv_free(ptr, len);
+        _pending.remove(id);
+        throw PicoViewException('pv_request rejected (code $rc)', code: rc);
       }
     } finally {
       malloc.free(reqPtr);
-      malloc.free(respPtr);
-      malloc.free(respLen);
     }
+
+    // The engine's own deadline plus a grace margin: it answers on time or
+    // answers ERROR_CODE_TIMEOUT, so this only fires if nothing came back.
+    final deadline = (engineTimeout ?? Duration.zero) + _responseGrace;
+    return completer.future.timeout(
+      deadline,
+      onTimeout: () {
+        _pending.remove(id);
+        throw PicoViewException(
+          'no response from the engine after $deadline',
+          code: pb.ErrorCode.ERROR_CODE_TIMEOUT.value,
+        );
+      },
+    );
   }
 
   /// Throw the matching exception for an `error` response.
@@ -154,27 +208,34 @@ class PicoViewController {
   /// Open the panel described by [config] and start the device worker,
   /// calling [init] first if it hasn't run.
   ///
-  /// Blocks until the device is open and the panel initialized, so a normal
-  /// return does mean a panel is attached; the engine gives up after ~10s.
-  /// [linkState] is [PicoLinkState.connected] on return, and a matching
-  /// transition is also delivered on [linkStates].
+  /// Completes once the device is open and the panel initialized, so a normal
+  /// return does mean a panel is attached; the engine gives up after ~10s. The
+  /// wait happens on the engine's own thread, so awaiting this does not stall
+  /// the isolate. [linkState] is [PicoLinkState.connected] on return, and a
+  /// matching transition is also delivered on [linkStates].
   ///
   /// The link can still drop afterwards — the engine reconnects on its own —
   /// so keep watching [linkStates] for the live state rather than assuming a
   /// successful open holds.
   ///
   /// Throws [PicoViewException] when no device could be opened.
-  void open(PicoViewConfig config) {
+  Future<void> open(PicoViewConfig config) async {
     if (!_initialized) init();
-    final req = pb.PvRequest(openDevice: pb.OpenDevice(model: config.model));
-    var resp = _request(req);
+    pb.PvRequest openReq() =>
+        pb.PvRequest(openDevice: pb.OpenDevice(model: config.model));
+
+    var resp = await _request(openReq(), engineTimeout: _openTimeout);
     if (resp.whichResp() == pb.PvResponse_Resp.error &&
         resp.error.code == pb.ErrorCode.ERROR_CODE_ALREADY_OPEN &&
         !_opened) {
       // The native worker survived a hot restart (this controller never
-      // opened it). Tear the stale one down and retry once.
-      _request(pb.PvRequest(closeDevice: pb.CloseDevice()));
-      resp = _request(req);
+      // opened it). Tear the stale one down and retry once. A fresh request
+      // each time: ids are stamped on send, so one can't be reused.
+      await _request(
+        pb.PvRequest(closeDevice: pb.CloseDevice()),
+        engineTimeout: _closeTimeout,
+      );
+      resp = await _request(openReq(), engineTimeout: _openTimeout);
     }
     if (resp.whichResp() == pb.PvResponse_Resp.error) {
       _throwError(resp.error, 'open');
@@ -202,10 +263,14 @@ class PicoViewController {
   }
 
   /// Set the panel backlight level, 0 (off) – 255 (full).
-  bool setBrightness(int level) {
+  ///
+  /// The engine queues the command and acks without waiting for the device, so
+  /// this completes on the next turn of the event loop. `true` means queued,
+  /// not applied.
+  Future<bool> setBrightness(int level) async {
     if (_disposed || !_opened) return false;
     final clamped = level.clamp(0, 255);
-    final resp = _request(
+    final resp = await _request(
       pb.PvRequest(setParam: pbw.SetParam(brightness: clamped)),
     );
     return resp.whichResp() != pb.PvResponse_Resp.error;
@@ -213,10 +278,11 @@ class PicoViewController {
 
   /// Play one built-in DRV2605L haptic effect ([effect] is a ROM waveform id,
   /// 1–123). [library] picks the ROM library (1–7); 0 keeps the firmware
-  /// default (the LRA library).
-  bool playHaptic(int effect, {int library = 0}) {
+  /// default (the LRA library). Queued, not awaited on the device — see
+  /// [setBrightness].
+  Future<bool> playHaptic(int effect, {int library = 0}) async {
     if (_disposed || !_opened) return false;
-    final resp = _request(
+    final resp = await _request(
       pb.PvRequest(
         haptics: pbw.Haptics(
           play: pbw.HapticsPlay(effect: effect, library: library),
@@ -228,9 +294,9 @@ class PicoViewController {
 
   /// Stop any haptic effect currently playing on the device. Best-effort; see
   /// [playHaptic].
-  bool stopHaptic() {
+  Future<bool> stopHaptic() async {
     if (_disposed || !_opened) return false;
-    final resp = _request(
+    final resp = await _request(
       pb.PvRequest(haptics: pbw.Haptics(stop: pbw.HapticsStop())),
     );
     return resp.whichResp() != pb.PvResponse_Resp.error;
@@ -240,19 +306,20 @@ class PicoViewController {
   /// panel geometry and capabilities.
   ///
   /// Unlike the fire-and-forget commands this round-trips to the device, so it
-  /// blocks the caller briefly (sub-second in practice; the engine gives up
+  /// takes a moment to complete (sub-second in practice; the engine gives up
   /// after a couple of seconds). Query it after a CONNECTED transition on
   /// [linkStates] rather than caching it across a reconnect — a different unit
   /// may have been plugged in.
   ///
   /// Throws [PicoViewException] when no device is open, the link is down, or
   /// the device did not answer in time.
-  PicoDeviceInfo getDeviceInfo() {
+  Future<PicoDeviceInfo> getDeviceInfo() async {
     if (_disposed || !_opened) {
       throw PicoViewException('getDeviceInfo: device not open', code: -1);
     }
-    final resp = _request(
+    final resp = await _request(
       pb.PvRequest(getDeviceInfo: pbw.GetDeviceInfo()),
+      engineTimeout: _deviceInfoTimeout,
     );
     if (resp.whichResp() == pb.PvResponse_Resp.error) {
       _throwError(resp.error, 'getDeviceInfo');
@@ -288,20 +355,23 @@ class PicoViewController {
   /// disconnected→connected pair appears on [linkStates]).
   ///
   /// Throws [PicoViewException] if the update couldn't be enqueued (no device
-  /// open, or the worker is gone).
-  void otaStart(Uint8List image) {
+  /// open, or the worker is gone). Completing means enqueued, not flashed.
+  Future<void> otaStart(Uint8List image) async {
     if (_disposed || !_opened) {
       throw PicoViewException('otaStart: device not open', code: -1);
     }
-    final resp = _request(pb.PvRequest(otaStart: pb.OtaStart(image: image)));
+    final resp = await _request(
+      pb.PvRequest(otaStart: pb.OtaStart(image: image)),
+    );
     if (resp.whichResp() == pb.PvResponse_Resp.error) {
       _throwError(resp.error, 'otaStart');
     }
   }
 
   /// Decode one `PvEvent` pushed from the native side and route it to the
-  /// matching stream. Unknown variants are ignored so newer native libraries
-  /// stay compatible with older Dart code.
+  /// matching stream — or, for a response, to the request waiting on its id.
+  /// Unknown variants are ignored so newer native libraries stay compatible
+  /// with older Dart code.
   void _onMessage(dynamic raw) {
     if (raw is! Uint8List) return;
     final pb.PvEvent event;
@@ -311,6 +381,8 @@ class PicoViewController {
       return;
     }
     switch (event.whichEvent()) {
+      case pb.PvEvent_Event.response:
+        _onResponse(event.response);
       case pb.PvEvent_Event.touch:
         _onTouch(event.touch);
       case pb.PvEvent_Event.link:
@@ -352,6 +424,15 @@ class PicoViewController {
     }
   }
 
+  /// Hand one response to the request that is waiting for it. An id with no
+  /// waiter is dropped: the request already timed out on this side, or the
+  /// engine answered one that was never sent.
+  void _onResponse(pb.PvResponse resp) {
+    final completer = _pending.remove(resp.id);
+    if (completer == null || completer.isCompleted) return;
+    completer.complete(resp);
+  }
+
   void _onTouch(pbw.Touch touch) {
     final phase = switch (touch.phase) {
       pbw.TouchPhase.TOUCH_PHASE_DOWN => TouchPhase.down,
@@ -366,16 +447,60 @@ class PicoViewController {
   /// Close the device and release all resources. Safe to call multiple times.
   ///
   /// Only tears down what *this* controller actually opened. The native engine
-  /// is a process-wide singleton, so `pv_close` is called only when [open]
+  /// is a process-wide singleton, so the device is closed only when [open]
   /// succeeded here — an unconditional close would tear down a device worker
   /// this controller never owned.
-  void dispose() {
+  ///
+  /// Awaits the teardown, so the `ReceivePort` stays open long enough to
+  /// receive the engine's answer. Callers that cannot await — a widget
+  /// `dispose`, say — should use [disposeSync] instead.
+  Future<void> dispose() async {
     if (_disposed) return;
-    _disposed = true;
+    if (_opened) {
+      try {
+        await _request(
+          pb.PvRequest(closeDevice: pb.CloseDevice()),
+          engineTimeout: _closeTimeout,
+        );
+      } on PicoViewException {
+        // Teardown is best-effort: an engine that won't answer is being
+        // released anyway, and the rest of the cleanup still has to happen.
+      }
+      _opened = false;
+    }
+    _teardown();
+  }
+
+  /// Close the device and release all resources without awaiting.
+  ///
+  /// Blocks the calling isolate for as long as the teardown takes (up to ~5s
+  /// in the worst case), which is the price of a synchronous close — prefer
+  /// [dispose] wherever a `Future` can be awaited. Meant for the paths that
+  /// have no isolate left to receive an answer: a widget `dispose`, or a
+  /// last-resort cleanup on shutdown.
+  void disposeSync() {
+    if (_disposed) return;
     if (_opened) {
       bindings.pv_close();
       _opened = false;
     }
+    _teardown();
+  }
+
+  /// Release everything held on this side. Shared by [dispose] and
+  /// [disposeSync], both of which have already dealt with the device.
+  void _teardown() {
+    _disposed = true;
+    // Nothing will answer these now — fail them rather than leave the callers
+    // waiting for their own timeouts to fire.
+    for (final completer in _pending.values) {
+      if (!completer.isCompleted) {
+        completer.completeError(
+          PicoViewException('controller disposed', code: -1),
+        );
+      }
+    }
+    _pending.clear();
     if (_frameBuffer != null) {
       malloc.free(_frameBuffer!);
       _frameBuffer = null;

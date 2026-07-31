@@ -33,6 +33,8 @@ enum PvRequest_Req {
 
 class PvRequest extends $pb.GeneratedMessage {
   factory PvRequest({
+    $core.int? id,
+    $core.int? timeoutMs,
     OpenDevice? openDevice,
     CloseDevice? closeDevice,
     OtaStart? otaStart,
@@ -41,6 +43,8 @@ class PvRequest extends $pb.GeneratedMessage {
     $0.Haptics? haptics,
   }) {
     final result = create();
+    if (id != null) result.id = id;
+    if (timeoutMs != null) result.timeoutMs = timeoutMs;
     if (openDevice != null) result.openDevice = openDevice;
     if (closeDevice != null) result.closeDevice = closeDevice;
     if (otaStart != null) result.otaStart = otaStart;
@@ -60,9 +64,9 @@ class PvRequest extends $pb.GeneratedMessage {
       create()..mergeFromJson(json, registry);
 
   static const $core.Map<$core.int, PvRequest_Req> _PvRequest_ReqByTag = {
-    1: PvRequest_Req.openDevice,
-    2: PvRequest_Req.closeDevice,
-    3: PvRequest_Req.otaStart,
+    3: PvRequest_Req.openDevice,
+    4: PvRequest_Req.closeDevice,
+    5: PvRequest_Req.otaStart,
     16: PvRequest_Req.getDeviceInfo,
     17: PvRequest_Req.setParam,
     18: PvRequest_Req.haptics,
@@ -72,12 +76,14 @@ class PvRequest extends $pb.GeneratedMessage {
       _omitMessageNames ? '' : 'PvRequest',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.ffi'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3, 16, 17, 18])
-    ..aOM<OpenDevice>(1, _omitFieldNames ? '' : 'openDevice',
+    ..oo(0, [3, 4, 5, 16, 17, 18])
+    ..aI(1, _omitFieldNames ? '' : 'id', fieldType: $pb.PbFieldType.OU3)
+    ..aI(2, _omitFieldNames ? '' : 'timeoutMs', fieldType: $pb.PbFieldType.OU3)
+    ..aOM<OpenDevice>(3, _omitFieldNames ? '' : 'openDevice',
         subBuilder: OpenDevice.create)
-    ..aOM<CloseDevice>(2, _omitFieldNames ? '' : 'closeDevice',
+    ..aOM<CloseDevice>(4, _omitFieldNames ? '' : 'closeDevice',
         subBuilder: CloseDevice.create)
-    ..aOM<OtaStart>(3, _omitFieldNames ? '' : 'otaStart',
+    ..aOM<OtaStart>(5, _omitFieldNames ? '' : 'otaStart',
         subBuilder: OtaStart.create)
     ..aOM<$0.GetDeviceInfo>(16, _omitFieldNames ? '' : 'getDeviceInfo',
         subBuilder: $0.GetDeviceInfo.create)
@@ -105,93 +111,118 @@ class PvRequest extends $pb.GeneratedMessage {
       _defaultInstance ??= $pb.GeneratedMessage.$_defaultFor<PvRequest>(create);
   static PvRequest? _defaultInstance;
 
-  @$pb.TagNumber(1)
-  @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   @$pb.TagNumber(16)
   @$pb.TagNumber(17)
   @$pb.TagNumber(18)
   PvRequest_Req whichReq() => _PvRequest_ReqByTag[$_whichOneof(0)]!;
-  @$pb.TagNumber(1)
-  @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
+  @$pb.TagNumber(5)
   @$pb.TagNumber(16)
   @$pb.TagNumber(17)
   @$pb.TagNumber(18)
   void clearReq() => $_clearField($_whichOneof(0));
 
+  /// Correlation id, echoed on the matching PvResponse. Callers pick it (a
+  /// per-controller counter is enough — the engine only ever hands it back).
+  /// 0 means "no answer wanted": the request still runs, but nothing is posted.
   @$pb.TagNumber(1)
-  OpenDevice get openDevice => $_getN(0);
+  $core.int get id => $_getIZ(0);
   @$pb.TagNumber(1)
-  set openDevice(OpenDevice value) => $_setField(1, value);
+  set id($core.int value) => $_setUnsignedInt32(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasOpenDevice() => $_has(0);
+  $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearOpenDevice() => $_clearField(1);
-  @$pb.TagNumber(1)
-  OpenDevice ensureOpenDevice() => $_ensure(0);
+  void clearId() => $_clearField(1);
 
+  /// How long the engine may spend before answering ERROR_CODE_TIMEOUT.
+  /// 0 = the engine's default for this variant. Clamped to REQUEST_TIMEOUT_MAX.
+  /// Only meaningful for the variants that round-trip (open_device,
+  /// close_device, get_device_info); the rest answer immediately.
   @$pb.TagNumber(2)
-  CloseDevice get closeDevice => $_getN(1);
+  $core.int get timeoutMs => $_getIZ(1);
   @$pb.TagNumber(2)
-  set closeDevice(CloseDevice value) => $_setField(2, value);
+  set timeoutMs($core.int value) => $_setUnsignedInt32(1, value);
   @$pb.TagNumber(2)
-  $core.bool hasCloseDevice() => $_has(1);
+  $core.bool hasTimeoutMs() => $_has(1);
   @$pb.TagNumber(2)
-  void clearCloseDevice() => $_clearField(2);
-  @$pb.TagNumber(2)
-  CloseDevice ensureCloseDevice() => $_ensure(1);
+  void clearTimeoutMs() => $_clearField(2);
 
   @$pb.TagNumber(3)
-  OtaStart get otaStart => $_getN(2);
+  OpenDevice get openDevice => $_getN(2);
   @$pb.TagNumber(3)
-  set otaStart(OtaStart value) => $_setField(3, value);
+  set openDevice(OpenDevice value) => $_setField(3, value);
   @$pb.TagNumber(3)
-  $core.bool hasOtaStart() => $_has(2);
+  $core.bool hasOpenDevice() => $_has(2);
   @$pb.TagNumber(3)
-  void clearOtaStart() => $_clearField(3);
+  void clearOpenDevice() => $_clearField(3);
   @$pb.TagNumber(3)
-  OtaStart ensureOtaStart() => $_ensure(2);
+  OpenDevice ensureOpenDevice() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  CloseDevice get closeDevice => $_getN(3);
+  @$pb.TagNumber(4)
+  set closeDevice(CloseDevice value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasCloseDevice() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearCloseDevice() => $_clearField(4);
+  @$pb.TagNumber(4)
+  CloseDevice ensureCloseDevice() => $_ensure(3);
+
+  @$pb.TagNumber(5)
+  OtaStart get otaStart => $_getN(4);
+  @$pb.TagNumber(5)
+  set otaStart(OtaStart value) => $_setField(5, value);
+  @$pb.TagNumber(5)
+  $core.bool hasOtaStart() => $_has(4);
+  @$pb.TagNumber(5)
+  void clearOtaStart() => $_clearField(5);
+  @$pb.TagNumber(5)
+  OtaStart ensureOtaStart() => $_ensure(4);
 
   /// Forwarded to the device.
   @$pb.TagNumber(16)
-  $0.GetDeviceInfo get getDeviceInfo => $_getN(3);
+  $0.GetDeviceInfo get getDeviceInfo => $_getN(5);
   @$pb.TagNumber(16)
   set getDeviceInfo($0.GetDeviceInfo value) => $_setField(16, value);
   @$pb.TagNumber(16)
-  $core.bool hasGetDeviceInfo() => $_has(3);
+  $core.bool hasGetDeviceInfo() => $_has(5);
   @$pb.TagNumber(16)
   void clearGetDeviceInfo() => $_clearField(16);
   @$pb.TagNumber(16)
-  $0.GetDeviceInfo ensureGetDeviceInfo() => $_ensure(3);
+  $0.GetDeviceInfo ensureGetDeviceInfo() => $_ensure(5);
 
   @$pb.TagNumber(17)
-  $0.SetParam get setParam => $_getN(4);
+  $0.SetParam get setParam => $_getN(6);
   @$pb.TagNumber(17)
   set setParam($0.SetParam value) => $_setField(17, value);
   @$pb.TagNumber(17)
-  $core.bool hasSetParam() => $_has(4);
+  $core.bool hasSetParam() => $_has(6);
   @$pb.TagNumber(17)
   void clearSetParam() => $_clearField(17);
   @$pb.TagNumber(17)
-  $0.SetParam ensureSetParam() => $_ensure(4);
+  $0.SetParam ensureSetParam() => $_ensure(6);
 
   @$pb.TagNumber(18)
-  $0.Haptics get haptics => $_getN(5);
+  $0.Haptics get haptics => $_getN(7);
   @$pb.TagNumber(18)
   set haptics($0.Haptics value) => $_setField(18, value);
   @$pb.TagNumber(18)
-  $core.bool hasHaptics() => $_has(5);
+  $core.bool hasHaptics() => $_has(7);
   @$pb.TagNumber(18)
   void clearHaptics() => $_clearField(18);
   @$pb.TagNumber(18)
-  $0.Haptics ensureHaptics() => $_ensure(5);
+  $0.Haptics ensureHaptics() => $_ensure(7);
 }
 
-/// Open the panel device and start a session. Request/reply: responds `ack` once
-/// the device is open and the panel initialized, ERROR_CODE_DEVICE when that
-/// fails, or ERROR_CODE_TIMEOUT if the worker did not get to it in time. A
-/// LinkEvent(CONNECTED) is posted alongside the `ack`.
+/// Open the panel device and start a session. Round-trips: the `ack` is posted
+/// once the device is open and the panel initialized (up to ~10s), or
+/// ERROR_CODE_DEVICE when that fails, or ERROR_CODE_TIMEOUT if the worker did
+/// not get to it in time. A LinkEvent(CONNECTED) is posted alongside the `ack`.
 class OpenDevice extends $pb.GeneratedMessage {
   factory OpenDevice({
     $core.int? index,
@@ -272,7 +303,8 @@ class OpenDevice extends $pb.GeneratedMessage {
   void clearSerial() => $_clearField(3);
 }
 
-/// Stop the worker and close the device. Responds `ack` after teardown completes.
+/// Stop the worker and close the device. Round-trips: the `ack` is posted after
+/// teardown completes. Idempotent.
 class CloseDevice extends $pb.GeneratedMessage {
   factory CloseDevice() => create();
 
@@ -311,8 +343,9 @@ class CloseDevice extends $pb.GeneratedMessage {
   static CloseDevice? _defaultInstance;
 }
 
-/// Stream a signed ESP-IDF app image to the device and commit it. Responds
-/// `ack` once enqueued; progress/result arrive as wire.OtaStatus events.
+/// Stream a signed ESP-IDF app image to the device and commit it. The `ack` is
+/// posted as soon as the transfer is *enqueued*; progress and the result arrive
+/// later as wire.OtaStatus events.
 class OtaStart extends $pb.GeneratedMessage {
   factory OtaStart({
     $core.List<$core.int>? image,
@@ -369,13 +402,16 @@ class OtaStart extends $pb.GeneratedMessage {
 
 enum PvResponse_Resp { ack, error, deviceInfo, notSet }
 
+/// The answer to one PvRequest, delivered as a PvEvent on the pv_init SendPort.
 class PvResponse extends $pb.GeneratedMessage {
   factory PvResponse({
+    $core.int? id,
     Ack? ack,
     Error? error,
     $0.DeviceInfo? deviceInfo,
   }) {
     final result = create();
+    if (id != null) result.id = id;
     if (ack != null) result.ack = ack;
     if (error != null) result.error = error;
     if (deviceInfo != null) result.deviceInfo = deviceInfo;
@@ -392,19 +428,20 @@ class PvResponse extends $pb.GeneratedMessage {
       create()..mergeFromJson(json, registry);
 
   static const $core.Map<$core.int, PvResponse_Resp> _PvResponse_RespByTag = {
-    1: PvResponse_Resp.ack,
-    2: PvResponse_Resp.error,
-    3: PvResponse_Resp.deviceInfo,
+    2: PvResponse_Resp.ack,
+    3: PvResponse_Resp.error,
+    4: PvResponse_Resp.deviceInfo,
     0: PvResponse_Resp.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'PvResponse',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.ffi'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
-    ..aOM<Ack>(1, _omitFieldNames ? '' : 'ack', subBuilder: Ack.create)
-    ..aOM<Error>(2, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
-    ..aOM<$0.DeviceInfo>(3, _omitFieldNames ? '' : 'deviceInfo',
+    ..oo(0, [2, 3, 4])
+    ..aI(1, _omitFieldNames ? '' : 'id', fieldType: $pb.PbFieldType.OU3)
+    ..aOM<Ack>(2, _omitFieldNames ? '' : 'ack', subBuilder: Ack.create)
+    ..aOM<Error>(3, _omitFieldNames ? '' : 'error', subBuilder: Error.create)
+    ..aOM<$0.DeviceInfo>(4, _omitFieldNames ? '' : 'deviceInfo',
         subBuilder: $0.DeviceInfo.create)
     ..hasRequiredFields = false;
 
@@ -426,47 +463,57 @@ class PvResponse extends $pb.GeneratedMessage {
       $pb.GeneratedMessage.$_defaultFor<PvResponse>(create);
   static PvResponse? _defaultInstance;
 
-  @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   PvResponse_Resp whichResp() => _PvResponse_RespByTag[$_whichOneof(0)]!;
-  @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   void clearResp() => $_clearField($_whichOneof(0));
 
+  /// Echoes PvRequest.id, so the caller knows which request this answers.
   @$pb.TagNumber(1)
-  Ack get ack => $_getN(0);
+  $core.int get id => $_getIZ(0);
   @$pb.TagNumber(1)
-  set ack(Ack value) => $_setField(1, value);
+  set id($core.int value) => $_setUnsignedInt32(0, value);
   @$pb.TagNumber(1)
-  $core.bool hasAck() => $_has(0);
+  $core.bool hasId() => $_has(0);
   @$pb.TagNumber(1)
-  void clearAck() => $_clearField(1);
-  @$pb.TagNumber(1)
-  Ack ensureAck() => $_ensure(0);
+  void clearId() => $_clearField(1);
 
   @$pb.TagNumber(2)
-  Error get error => $_getN(1);
+  Ack get ack => $_getN(1);
   @$pb.TagNumber(2)
-  set error(Error value) => $_setField(2, value);
+  set ack(Ack value) => $_setField(2, value);
   @$pb.TagNumber(2)
-  $core.bool hasError() => $_has(1);
+  $core.bool hasAck() => $_has(1);
   @$pb.TagNumber(2)
-  void clearError() => $_clearField(2);
+  void clearAck() => $_clearField(2);
   @$pb.TagNumber(2)
-  Error ensureError() => $_ensure(1);
+  Ack ensureAck() => $_ensure(1);
 
   @$pb.TagNumber(3)
-  $0.DeviceInfo get deviceInfo => $_getN(2);
+  Error get error => $_getN(2);
   @$pb.TagNumber(3)
-  set deviceInfo($0.DeviceInfo value) => $_setField(3, value);
+  set error(Error value) => $_setField(3, value);
   @$pb.TagNumber(3)
-  $core.bool hasDeviceInfo() => $_has(2);
+  $core.bool hasError() => $_has(2);
   @$pb.TagNumber(3)
-  void clearDeviceInfo() => $_clearField(3);
+  void clearError() => $_clearField(3);
   @$pb.TagNumber(3)
-  $0.DeviceInfo ensureDeviceInfo() => $_ensure(2);
+  Error ensureError() => $_ensure(2);
+
+  @$pb.TagNumber(4)
+  $0.DeviceInfo get deviceInfo => $_getN(3);
+  @$pb.TagNumber(4)
+  set deviceInfo($0.DeviceInfo value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasDeviceInfo() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearDeviceInfo() => $_clearField(4);
+  @$pb.TagNumber(4)
+  $0.DeviceInfo ensureDeviceInfo() => $_ensure(3);
 }
 
 class Ack extends $pb.GeneratedMessage {
@@ -682,18 +729,20 @@ class LinkEvent extends $pb.GeneratedMessage {
   void clearFwVersion() => $_clearField(5);
 }
 
-enum PvEvent_Event { touch, link, ota, notSet }
+enum PvEvent_Event { touch, link, ota, response, notSet }
 
 class PvEvent extends $pb.GeneratedMessage {
   factory PvEvent({
     $0.Touch? touch,
     LinkEvent? link,
     $0.OtaStatus? ota,
+    PvResponse? response,
   }) {
     final result = create();
     if (touch != null) result.touch = touch;
     if (link != null) result.link = link;
     if (ota != null) result.ota = ota;
+    if (response != null) result.response = response;
     return result;
   }
 
@@ -710,19 +759,22 @@ class PvEvent extends $pb.GeneratedMessage {
     1: PvEvent_Event.touch,
     2: PvEvent_Event.link,
     3: PvEvent_Event.ota,
+    4: PvEvent_Event.response,
     0: PvEvent_Event.notSet
   };
   static final $pb.BuilderInfo _i = $pb.BuilderInfo(
       _omitMessageNames ? '' : 'PvEvent',
       package: const $pb.PackageName(_omitMessageNames ? '' : 'picoview.ffi'),
       createEmptyInstance: create)
-    ..oo(0, [1, 2, 3])
+    ..oo(0, [1, 2, 3, 4])
     ..aOM<$0.Touch>(1, _omitFieldNames ? '' : 'touch',
         subBuilder: $0.Touch.create)
     ..aOM<LinkEvent>(2, _omitFieldNames ? '' : 'link',
         subBuilder: LinkEvent.create)
     ..aOM<$0.OtaStatus>(3, _omitFieldNames ? '' : 'ota',
         subBuilder: $0.OtaStatus.create)
+    ..aOM<PvResponse>(4, _omitFieldNames ? '' : 'response',
+        subBuilder: PvResponse.create)
     ..hasRequiredFields = false;
 
   @$core.Deprecated('See https://github.com/google/protobuf.dart/issues/998.')
@@ -746,10 +798,12 @@ class PvEvent extends $pb.GeneratedMessage {
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   PvEvent_Event whichEvent() => _PvEvent_EventByTag[$_whichOneof(0)]!;
   @$pb.TagNumber(1)
   @$pb.TagNumber(2)
   @$pb.TagNumber(3)
+  @$pb.TagNumber(4)
   void clearEvent() => $_clearField($_whichOneof(0));
 
   @$pb.TagNumber(1)
@@ -784,6 +838,18 @@ class PvEvent extends $pb.GeneratedMessage {
   void clearOta() => $_clearField(3);
   @$pb.TagNumber(3)
   $0.OtaStatus ensureOta() => $_ensure(2);
+
+  /// The answer to an earlier pv_request; match it on PvResponse.id.
+  @$pb.TagNumber(4)
+  PvResponse get response => $_getN(3);
+  @$pb.TagNumber(4)
+  set response(PvResponse value) => $_setField(4, value);
+  @$pb.TagNumber(4)
+  $core.bool hasResponse() => $_has(3);
+  @$pb.TagNumber(4)
+  void clearResponse() => $_clearField(4);
+  @$pb.TagNumber(4)
+  PvResponse ensureResponse() => $_ensure(3);
 }
 
 const $core.bool _omitFieldNames =

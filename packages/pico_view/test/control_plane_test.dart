@@ -57,6 +57,27 @@ void main() {
       final decoded = pb.PvRequest.fromBuffer(pb.PvRequest().writeToBuffer());
       expect(decoded.whichReq(), pb.PvRequest_Req.notSet);
     });
+
+    test('the id and timeout ride alongside the variant, not inside it', () {
+      // Both sit outside the oneof, so setting the variant must not clear
+      // them — the id is what the response is matched on.
+      final req = pb.PvRequest(getDeviceInfo: pbw.GetDeviceInfo())
+        ..id = 42
+        ..timeoutMs = 2000;
+      final decoded = pb.PvRequest.fromBuffer(req.writeToBuffer());
+      expect(decoded.id, 42);
+      expect(decoded.timeoutMs, 2000);
+      expect(decoded.whichReq(), pb.PvRequest_Req.getDeviceInfo);
+    });
+
+    test('an unset id and timeout default to 0', () {
+      // 0 is meaningful on both: "answer nobody" and "use the engine default".
+      final decoded = pb.PvRequest.fromBuffer(
+        pb.PvRequest(closeDevice: pb.CloseDevice()).writeToBuffer(),
+      );
+      expect(decoded.id, 0);
+      expect(decoded.timeoutMs, 0);
+    });
   });
 
   group('PvResponse', () {
@@ -169,6 +190,33 @@ void main() {
       final decoded = pb.PvEvent.fromBuffer(event.writeToBuffer());
       expect(decoded.ota.err, -1);
       expect(decoded.ota.pct, 42);
+    });
+
+    test('a response arrives as an event carrying its request id', () {
+      // How every non-frame call is answered now: the engine posts the
+      // PvResponse on the same SendPort as touch/link/OTA, and the controller
+      // matches `id` back to the Completer that is waiting on it.
+      final event = pb.PvEvent(
+        response: pb.PvResponse(id: 7, ack: pb.Ack()),
+      );
+      final decoded = pb.PvEvent.fromBuffer(event.writeToBuffer());
+      expect(decoded.whichEvent(), pb.PvEvent_Event.response);
+      expect(decoded.response.id, 7);
+      expect(decoded.response.whichResp(), pb.PvResponse_Resp.ack);
+    });
+
+    test('a response keeps its id alongside a device_info payload', () {
+      // The id sits outside the `resp` oneof, so it survives the largest
+      // payload the control plane carries.
+      final event = pb.PvEvent(
+        response: pb.PvResponse(
+          id: 4294967295,
+          deviceInfo: pbw.DeviceInfo(serial: 'PV-P4-0001'),
+        ),
+      );
+      final decoded = pb.PvEvent.fromBuffer(event.writeToBuffer());
+      expect(decoded.response.id, 4294967295);
+      expect(decoded.response.deviceInfo.serial, 'PV-P4-0001');
     });
 
     test('an unknown event variant decodes as notSet', () {

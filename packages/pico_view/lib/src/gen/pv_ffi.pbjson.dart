@@ -58,9 +58,11 @@ final $typed_data.Uint8List linkStateDescriptor = $convert.base64Decode(
 const PvRequest$json = {
   '1': 'PvRequest',
   '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 13, '10': 'id'},
+    {'1': 'timeout_ms', '3': 2, '4': 1, '5': 13, '10': 'timeoutMs'},
     {
       '1': 'open_device',
-      '3': 1,
+      '3': 3,
       '4': 1,
       '5': 11,
       '6': '.picoview.ffi.OpenDevice',
@@ -69,7 +71,7 @@ const PvRequest$json = {
     },
     {
       '1': 'close_device',
-      '3': 2,
+      '3': 4,
       '4': 1,
       '5': 11,
       '6': '.picoview.ffi.CloseDevice',
@@ -78,7 +80,7 @@ const PvRequest$json = {
     },
     {
       '1': 'ota_start',
-      '3': 3,
+      '3': 5,
       '4': 1,
       '5': 11,
       '6': '.picoview.ffi.OtaStart',
@@ -120,13 +122,14 @@ const PvRequest$json = {
 
 /// Descriptor for `PvRequest`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List pvRequestDescriptor = $convert.base64Decode(
-    'CglQdlJlcXVlc3QSOwoLb3Blbl9kZXZpY2UYASABKAsyGC5waWNvdmlldy5mZmkuT3BlbkRldm'
-    'ljZUgAUgpvcGVuRGV2aWNlEj4KDGNsb3NlX2RldmljZRgCIAEoCzIZLnBpY292aWV3LmZmaS5D'
-    'bG9zZURldmljZUgAUgtjbG9zZURldmljZRI1CglvdGFfc3RhcnQYAyABKAsyFi5waWNvdmlldy'
-    '5mZmkuT3RhU3RhcnRIAFIIb3RhU3RhcnQSRgoPZ2V0X2RldmljZV9pbmZvGBAgASgLMhwucGlj'
-    'b3ZpZXcud2lyZS5HZXREZXZpY2VJbmZvSABSDWdldERldmljZUluZm8SNgoJc2V0X3BhcmFtGB'
-    'EgASgLMhcucGljb3ZpZXcud2lyZS5TZXRQYXJhbUgAUghzZXRQYXJhbRIyCgdoYXB0aWNzGBIg'
-    'ASgLMhYucGljb3ZpZXcud2lyZS5IYXB0aWNzSABSB2hhcHRpY3NCBQoDcmVx');
+    'CglQdlJlcXVlc3QSDgoCaWQYASABKA1SAmlkEh0KCnRpbWVvdXRfbXMYAiABKA1SCXRpbWVvdX'
+    'RNcxI7CgtvcGVuX2RldmljZRgDIAEoCzIYLnBpY292aWV3LmZmaS5PcGVuRGV2aWNlSABSCm9w'
+    'ZW5EZXZpY2USPgoMY2xvc2VfZGV2aWNlGAQgASgLMhkucGljb3ZpZXcuZmZpLkNsb3NlRGV2aW'
+    'NlSABSC2Nsb3NlRGV2aWNlEjUKCW90YV9zdGFydBgFIAEoCzIWLnBpY292aWV3LmZmaS5PdGFT'
+    'dGFydEgAUghvdGFTdGFydBJGCg9nZXRfZGV2aWNlX2luZm8YECABKAsyHC5waWNvdmlldy53aX'
+    'JlLkdldERldmljZUluZm9IAFINZ2V0RGV2aWNlSW5mbxI2CglzZXRfcGFyYW0YESABKAsyFy5w'
+    'aWNvdmlldy53aXJlLlNldFBhcmFtSABSCHNldFBhcmFtEjIKB2hhcHRpY3MYEiABKAsyFi5waW'
+    'Nvdmlldy53aXJlLkhhcHRpY3NIAFIHaGFwdGljc0IFCgNyZXE=');
 
 @$core.Deprecated('Use openDeviceDescriptor instead')
 const OpenDevice$json = {
@@ -168,9 +171,10 @@ final $typed_data.Uint8List otaStartDescriptor =
 const PvResponse$json = {
   '1': 'PvResponse',
   '2': [
+    {'1': 'id', '3': 1, '4': 1, '5': 13, '10': 'id'},
     {
       '1': 'ack',
-      '3': 1,
+      '3': 2,
       '4': 1,
       '5': 11,
       '6': '.picoview.ffi.Ack',
@@ -179,7 +183,7 @@ const PvResponse$json = {
     },
     {
       '1': 'error',
-      '3': 2,
+      '3': 3,
       '4': 1,
       '5': 11,
       '6': '.picoview.ffi.Error',
@@ -188,7 +192,7 @@ const PvResponse$json = {
     },
     {
       '1': 'device_info',
-      '3': 3,
+      '3': 4,
       '4': 1,
       '5': 11,
       '6': '.picoview.wire.DeviceInfo',
@@ -203,10 +207,10 @@ const PvResponse$json = {
 
 /// Descriptor for `PvResponse`. Decode as a `google.protobuf.DescriptorProto`.
 final $typed_data.Uint8List pvResponseDescriptor = $convert.base64Decode(
-    'CgpQdlJlc3BvbnNlEiUKA2FjaxgBIAEoCzIRLnBpY292aWV3LmZmaS5BY2tIAFIDYWNrEisKBW'
-    'Vycm9yGAIgASgLMhMucGljb3ZpZXcuZmZpLkVycm9ySABSBWVycm9yEjwKC2RldmljZV9pbmZv'
-    'GAMgASgLMhkucGljb3ZpZXcud2lyZS5EZXZpY2VJbmZvSABSCmRldmljZUluZm9CBgoEcmVzcA'
-    '==');
+    'CgpQdlJlc3BvbnNlEg4KAmlkGAEgASgNUgJpZBIlCgNhY2sYAiABKAsyES5waWNvdmlldy5mZm'
+    'kuQWNrSABSA2FjaxIrCgVlcnJvchgDIAEoCzITLnBpY292aWV3LmZmaS5FcnJvckgAUgVlcnJv'
+    'chI8CgtkZXZpY2VfaW5mbxgEIAEoCzIZLnBpY292aWV3LndpcmUuRGV2aWNlSW5mb0gAUgpkZX'
+    'ZpY2VJbmZvQgYKBHJlc3A=');
 
 @$core.Deprecated('Use ackDescriptor instead')
 const Ack$json = {
@@ -294,6 +298,15 @@ const PvEvent$json = {
       '9': 0,
       '10': 'ota'
     },
+    {
+      '1': 'response',
+      '3': 4,
+      '4': 1,
+      '5': 11,
+      '6': '.picoview.ffi.PvResponse',
+      '9': 0,
+      '10': 'response'
+    },
   ],
   '8': [
     {'1': 'event'},
@@ -304,4 +317,5 @@ const PvEvent$json = {
 final $typed_data.Uint8List pvEventDescriptor = $convert.base64Decode(
     'CgdQdkV2ZW50EiwKBXRvdWNoGAEgASgLMhQucGljb3ZpZXcud2lyZS5Ub3VjaEgAUgV0b3VjaB'
     'ItCgRsaW5rGAIgASgLMhcucGljb3ZpZXcuZmZpLkxpbmtFdmVudEgAUgRsaW5rEiwKA290YRgD'
-    'IAEoCzIYLnBpY292aWV3LndpcmUuT3RhU3RhdHVzSABSA290YUIHCgVldmVudA==');
+    'IAEoCzIYLnBpY292aWV3LndpcmUuT3RhU3RhdHVzSABSA290YRI2CghyZXNwb25zZRgEIAEoCz'
+    'IYLnBpY292aWV3LmZmaS5QdlJlc3BvbnNlSABSCHJlc3BvbnNlQgcKBWV2ZW50');
