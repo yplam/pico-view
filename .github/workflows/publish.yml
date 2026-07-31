@@ -16,6 +16,7 @@ jobs:
   publish:
     name: Publish package
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       id-token: write
     defaults:
@@ -45,6 +46,8 @@ jobs:
 
       - name: Resolve dependencies
         run: flutter pub get
+
+      - uses: dart-lang/setup-dart@v1
 
       - name: Publish
         run: flutter pub publish --force
