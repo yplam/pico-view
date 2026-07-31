@@ -32,13 +32,14 @@ The controller also exposes broadcast streams — `touches`, `linkStates`,
 `otaStart`) and `getDeviceInfo()`, which round-trips to the device for its
 serial, firmware version, panel geometry and capabilities.
 
-See [`example/`](example/) for a runnable app that mirrors a clock to the panel
-and switches face on a physical tap.
+See [`example/`](https://github.com/yplam/pico-view/tree/master/packages/pico_view/example)
+for a runnable app that mirrors a clock to the panel and switches face on a
+physical tap.
 
 ## Native engine
 
 The `pico-view` engine is Rust; its source lives in this repo under
-[`crates/pico-view`](https://github.com/yplam/pico-view/tree/main/crates/pico-view).
+[`crates/pico-view`](https://github.com/yplam/pico-view/tree/master/crates/pico-view).
 The built libraries are **not committed** — the Dart build hook
 (`hook/build.dart`) downloads the release pinned in `native/engine.lock`,
 verifies its SHA-256, and links it as a native code asset, so building the app
@@ -52,12 +53,32 @@ flutter config --enable-native-assets
 ```
 
 To build the engine yourself and link that instead, run `./build.sh` at the repo
-root (see [`native/README.md`](native/README.md) for both override mechanisms).
+root (see [`native/README.md`](https://github.com/yplam/pico-view/blob/master/packages/pico_view/native/README.md)
+for both override mechanisms).
+
+## Connecting the panel
 
 The USB link is **driverless** on all three platforms (a vendor-class interface
-with WinUSB/MS-OS-2.0 descriptors): Windows auto-binds WinUSB, macOS claims it
-via libusb natively, and Linux needs only a one-line udev rule for non-root
-access. No CH347 or other kernel driver is involved.
+with WinUSB/MS-OS-2.0 descriptors), so no CH347 or other kernel driver is
+involved. Windows auto-binds WinUSB from the device's MS-OS-2.0 descriptors and
+macOS claims the interface natively — neither needs any setup.
+
+**Linux** needs one udev rule so libusb can claim the vendor interface without
+root. It is a permissions file, not a driver:
+
+```sh
+echo 'SUBSYSTEM=="usb", ATTR{idVendor}=="303a", ATTR{idProduct}=="839a", MODE="0666"' \
+  | sudo tee /etc/udev/rules.d/99-pico-view.rules
+sudo udevadm control --reload-rules && sudo udevadm trigger
+```
+
+Then replug the panel. `MODE="0666"` rather than `0660` (which would leave the
+node `root:root` and lock the device down harder than udev's `0664` default) or
+`TAG+="uaccess"` (which needs an active local seat, so it breaks over SSH).
+Adjust `idProduct` if your firmware changes `PV_USB_PID`.
+
+Without the rule, `PicoViewController.open` fails with a device error even
+though the panel is plugged in and enumerated.
 
 ## FFI surface & bindings
 
@@ -84,4 +105,4 @@ symbols, so the ABI itself stays fixed.
 
 ## License
 
-Apache-2.0. See [LICENSE](LICENSE).
+Apache-2.0. See [LICENSE](https://github.com/yplam/pico-view/blob/master/packages/pico_view/LICENSE).

@@ -56,9 +56,11 @@ class PicoViewController {
   ffi.Pointer<ffi.Uint8>? _frameBuffer;
   int _frameBufferCap = 0;
 
-  /// When true, an external frame producer (e.g. the video module) is pushing
-  /// frames straight to the panel via [flushRgba], so the [PicoView] mirror loop
-  /// must pause its own captures to avoid two writers fighting over the panel.
+  /// When true, an external frame producer is pushing frames straight to the
+  /// panel via [flushRgba] — a video decoder, say — so the `PicoView` mirror
+  /// loop must pause its own captures to avoid two writers fighting over the
+  /// panel. Set it before the producer's first frame and clear it when the
+  /// producer is done; the mirror then re-sends the current subtree.
   bool suspendCapture = false;
 
   /// Physical-touch events in LCD pixel coordinates.
@@ -363,10 +365,10 @@ class PicoViewController {
 
   /// Close the device and release all resources. Safe to call multiple times.
   ///
-  /// Only tears down the native state *this* controller owns: the app runs one
-  /// device controller plus a sampling-only controller (the native engine is a
-  /// global singleton), so an unconditional `pv_close` here would kill the
-  /// other controller's device worker.
+  /// Only tears down what *this* controller actually opened. The native engine
+  /// is a process-wide singleton, so `pv_close` is called only when [open]
+  /// succeeded here — an unconditional close would tear down a device worker
+  /// this controller never owned.
   void dispose() {
     if (_disposed) return;
     _disposed = true;

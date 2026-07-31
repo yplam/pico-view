@@ -12,7 +12,8 @@ flutter config --enable-native-assets   # once
 flutter run -d linux                    # or macos / windows
 ```
 
-On Linux, non-root access to the panel needs a udev rule (see the package
-README). To run against an engine built from `crates/` instead of the release
+On Linux, non-root access to the panel needs a udev rule — see "Connecting the
+panel" in the [package README](../README.md). To run against an engine built
+from `crates/` instead of the release
 pinned in `../native/engine.lock`, run `./build.sh` at the repo root — it writes
 the `../native/engine.local` override the build hook reads first.

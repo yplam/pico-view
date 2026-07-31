@@ -61,8 +61,8 @@ class _PicoViewState extends State<PicoView> with WidgetsBindingObserver {
   int _lastHash = 0;
 
   /// Tracks the falling edge of [PicoViewController.suspendCapture] so the mirror
-  /// loop forces a fresh capture when an external producer (the video module)
-  /// releases the panel.
+  /// loop forces a fresh capture when an external frame producer releases the
+  /// panel.
   bool _wasSuspended = false;
 
   /// Frame-rate budget in milliseconds, derived from [PicoView.maxFps].
