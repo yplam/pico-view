@@ -4,10 +4,10 @@
 # not edit by hand. The engine source is in this same repo under `crates/`; the
 # binaries are not committed. To bump, push a new `engine-v*` tag.
 repo = yplam/pico-view
-tag = engine-v0.3.0
+tag = engine-v0.4.1
 
-a64dc927e2a69a7cf7c384a9b93dafa442c2c4515b17dab757228a70691773b1  libpico_view-aarch64-apple-darwin.dylib
-bf749de6f6c13b4e53ab78389700a025d10df607c3af13e3e40f4629384426e6  libpico_view-aarch64-unknown-linux-gnu.so
-52515b4cd1074b725db1b17f0f5a9e2a55e1888ac01af03dba552e8cf783f654  libpico_view-x86_64-apple-darwin.dylib
-31ffc305030a1273514cedfaddcd73e7d9e64332ba1bb5a460e5cedfdf67af86  libpico_view-x86_64-unknown-linux-gnu.so
-8cb49a638e9d068ee574493669404cafba3be79f1f29f19525d2738761236e62  pico_view-x86_64-pc-windows-msvc.dll
+a67ddfe5d8ac54fa37367d199f22b0801f6fc6dd864a614e25dd177fb7fe97ea  libpico_view-aarch64-apple-darwin.dylib
+e178b162c7c929386151d45211ca16cbd3a51406b640f417d5bc917ac5516bb8  libpico_view-aarch64-unknown-linux-gnu.so
+28a79f2f3a153a937d95bde8b206dca415c3bd0275dbd5647a5b4b5077170839  libpico_view-x86_64-apple-darwin.dylib
+1bdd021075b331ac27d93a0f2a3debaee9a7c30901c99ccadd955cc22824aec7  libpico_view-x86_64-unknown-linux-gnu.so
+19c8a83e8cf2fe95d7b90363cc9f0b2920d3121f39d94cdad9d90b7961f57b8d  pico_view-x86_64-pc-windows-msvc.dll
