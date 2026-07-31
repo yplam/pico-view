@@ -6,6 +6,7 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
 
 concurrency:
   group: publish-${{ github.ref_name }}
@@ -27,6 +28,10 @@ jobs:
         shell: bash
         run: |
           tag="${{ github.ref_name }}"
+          if [ "${{ github.ref_type }}" != "tag" ]; then
+            echo "::error::This workflow must run against a tag ref, got ${{ github.ref_type }} '$tag'."
+            exit 1
+          fi
           ver="$(awk '/^version:/{print $2; exit}' pubspec.yaml)"
           if [ "$tag" != "v$ver" ]; then
             echo "::error::Release tag '$tag' does not match pubspec.yaml version 'v$ver'. Bump pubspec.yaml or retag."
