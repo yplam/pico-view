@@ -26,18 +26,7 @@ external int pv_init(ffi.Pointer<ffi.Void> api_data, int send_port);
 /// matches the two. Set `PvRequest.id` to 0 to run a request without an answer.
 ///
 /// Every accepted request with a nonzero id is answered exactly once, so a
-/// caller waiting on an id is never left hanging. How long that takes varies:
-/// - open_device answers `ack` once the device is open and the panel
-/// initialized — up to ~10s — or ERROR_CODE_DEVICE / ERROR_CODE_TIMEOUT. A
-/// LinkEvent(CONNECTED) is posted alongside the `ack`.
-/// - close_device answers `ack` after teardown completes.
-/// - get_device_info round-trips to the device and answers `device_info`.
-/// - ota_start answers `ack` once the transfer is *enqueued*; progress and the
-/// result arrive later as OtaStatus PvEvents.
-/// - set_param and haptics are fire-and-forget: `ack` means queued, not applied.
-/// The first three round-trip to the device, so they answer on the engine's own
-/// thread; the rest answer before this call returns. Override the per-variant
-/// deadline with `PvRequest.timeout_ms` (0 keeps the default, capped at 60s).
+/// caller waiting on an id is never left hanging.
 @ffi.Native<ffi.Int32 Function(ffi.Pointer<ffi.Uint8>, ffi.UintPtr)>()
 external int pv_request(ffi.Pointer<ffi.Uint8> req, int req_len);
 
@@ -61,9 +50,5 @@ external int pv_lcd_flush(
 
 /// Stop the worker and close the device.
 /// Blocks until the device is fully torn down. Returns 0.
-///
-/// The last-resort teardown, for a caller with no isolate left to receive a
-/// posted answer (a Dart hot restart, or a dispose that cannot await). A caller
-/// that can wait should send a close_device request instead.
 @ffi.Native<ffi.Int32 Function()>()
 external int pv_close();
