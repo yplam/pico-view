@@ -1,6 +1,6 @@
 name: pico_view
 description: "Mirror a Flutter widget subtree to an external LCD driven by ESP32-P4 firmware over USB, with capacitive touch fed back into the widget tree."
-version: 0.4.0
+version: 0.4.1
 repository: https://github.com/yplam/pico-view
 issue_tracker: https://github.com/yplam/pico-view/issues
 documentation: https://github.com/yplam/pico-view#readme
