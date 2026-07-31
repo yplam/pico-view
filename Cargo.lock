@@ -601,7 +601,7 @@ dependencies = [
 
 [[package]]
 name = "pico-view"
-version = "0.3.0"
+version = "0.4.1"
 dependencies = [
  "dart-sys",
  "env_logger",
