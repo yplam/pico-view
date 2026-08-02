@@ -1,0 +1,17 @@
+/build/
+/keys/
+/managed_components/
+/dependencies.lock
+/sdkconfig
+/sdkconfig.old
+/.cache/
+/compile_commands.json
+/build-recovery/
+
+# Defensive: never commit key material or the provisioning ledger into what is
+# a public repo. Private keys / the vendor CA / per-device provisioning logs
+# live offline (see provisioning/README.md); these patterns catch a stray copy
+# regardless of where under the tree it lands.
+*.pem
+provisioned.log
+provisioning/__pycache__/

@@ -1,0 +1,40 @@
+# pico-view ESP32-P4 flash layout (8MB) for signed OTA + factory recovery.
+#
+# Fixed for the product's life: the bootloader and this partition table are NEVER
+# updated over the air (the P4 ROM has no recovery-bootloader fallback in IDF
+# 5.5.x, so an interrupted bootloader write would brick the unit). Only the app
+# images (ota_0 / ota_1) are updated; `factory` is the minimal USB+OTA recovery
+# app and is flashed once at manufacturing.
+#
+# Boot selection: the 2nd-stage bootloader reads `otadata` to pick ota_0/ota_1;
+# if otadata is empty/invalid it falls back to `factory`. Manufacturing MUST
+# write otadata to select ota_0 so a shipped unit boots the application, not
+# recovery (see README "Manufacturing").
+#
+# nvs_key is reserved (unused today) and kept only so the immutable table has
+# headroom; this open-hardware build does not enable flash encryption.
+#
+# `assets` holds the emote/face animation pack (mmap image) shown on the panel
+# when no USB host is driving frames. It is a data partition, so its CONTENTS may
+# be rewritten (baked at manufacturing, or a custom update flow) even though the
+# table LAYOUT is fixed. The app slots are 2MB each: the application is <1MB today
+# and gains the LVGL/gfx emote engine, which still leaves comfortable headroom.
+#
+# devid holds the factory-provisioned device certificate (a v2 ECDSA cert; the
+# identity key itself lives in eFuse, not here — see main/auth.c and
+# provisioning/). Deliberately NOT flagged `encrypted`: the cert is public data
+# whose integrity comes from its CA signature, and keeping it plaintext lets
+# provisioning write it with a plain `esptool write_flash` regardless of the
+# unit's flash-encryption state. A blank devid is a supported state — the unit
+# reports itself unverified and works normally.
+#
+# Name,     Type, SubType,   Offset,    Size,     Flags
+nvs,        data, nvs,       0x9000,    0x6000,
+nvs_key,    data, nvs_keys,  0xF000,    0x1000,   encrypted
+otadata,    data, ota,       0x10000,   0x2000,
+phy_init,   data, phy,       0x12000,   0x1000,
+devid,      data, 0x40,      0x13000,   0x1000,
+factory,    app,  factory,   0x20000,   0x100000,
+ota_0,      app,  ota_0,     0x120000,  0x200000,
+ota_1,      app,  ota_1,     0x320000,  0x200000,
+assets,     data, spiffs,    0x520000,  0x2E0000,

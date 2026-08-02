@@ -1,0 +1,50 @@
+; pico_view_winusb.inf
+; Binds WinUSB.sys to the pico-view ESP32-P4 vendor device (VID 303A / PID 839A).
+;
+; Belt-and-suspenders companion to the firmware's MS OS 2.0 descriptors: on a
+; clean machine Windows auto-binds WinUSB from those descriptors and this INF is
+; unnecessary. It exists for machines whose usbflags cache was poisoned by an
+; earlier firmware ("unknown device" that never re-queries the MS-OS set), and
+; for deterministic first-plug binding at deploy time.
+;
+; The DeviceInterfaceGUID below MUST match the one the firmware advertises in
+; usb_descriptors.c so the host opens the same interface either way.
+
+[Version]
+Signature   = "$Windows NT$"
+Class       = USBDevice
+ClassGuid   = {88BAE032-5A81-49F0-BC3D-A4FF138216D6}
+Provider    = %ProviderName%
+CatalogFile = pico_view_winusb.cat
+DriverVer   = 07/05/2026,1.0.0.0
+PnpLockdown = 1
+
+[Manufacturer]
+%ManufacturerName% = Standard,NTamd64,NTarm64
+
+[Standard.NTamd64]
+%DeviceName% = USB_Install, USB\VID_303A&PID_839A
+
+[Standard.NTarm64]
+%DeviceName% = USB_Install, USB\VID_303A&PID_839A
+
+; --- Pull in the inbox WinUSB driver; no binaries shipped in this package ---
+[USB_Install]
+Include = winusb.inf
+Needs   = WINUSB.NT
+
+[USB_Install.Services]
+Include = winusb.inf
+Needs   = WINUSB.NT.Services
+
+[USB_Install.HW]
+AddReg = Dev_AddReg
+
+[Dev_AddReg]
+; Must equal the firmware's MS OS 2.0 DeviceInterfaceGUIDs property.
+HKR,,DeviceInterfaceGUIDs,0x00010000,"{975F44D9-0D08-43FD-8B3E-127CA8AFFF9D}"
+
+[Strings]
+ProviderName     = "pico-view"
+ManufacturerName = "pico-view"
+DeviceName       = "pico-view ESP32-P4 display"

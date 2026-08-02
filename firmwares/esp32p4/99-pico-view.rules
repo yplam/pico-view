@@ -1,0 +1,8 @@
+# Linux udev rule for the pico-view ESP32-P4 vendor-bulk device.
+#
+# Install:
+#   sudo cp 99-pico-view.rules /etc/udev/rules.d/
+#   sudo udevadm control --reload-rules && sudo udevadm trigger
+#
+# Adjust idProduct if you change PV_USB_PID in usb_descriptors.c.
+SUBSYSTEM=="usb", ATTR{idVendor}=="303a", ATTR{idProduct}=="839a", MODE="0666"

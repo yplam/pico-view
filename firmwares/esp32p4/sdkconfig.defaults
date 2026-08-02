@@ -1,0 +1,103 @@
+# --- Target / board: ESP32-P4-Custom-Board (8MB flash, 16MB PSRAM) ---
+CONFIG_IDF_TARGET="esp32p4"
+CONFIG_ESPTOOLPY_FLASHSIZE_8MB=y
+
+# --- ST77916 QSPI panel wiring (IO16-23) + CST816 touch I2C (IO28/IO29) ---
+# QSPI: SCLK + CS + four data lines (D0-D3), no D/C line. RST/BL on IO22/IO23.
+CONFIG_PV_PIN_LCD_SCLK=9
+CONFIG_PV_PIN_LCD_CS=7
+CONFIG_PV_PIN_LCD_D0=8
+CONFIG_PV_PIN_LCD_D1=10
+CONFIG_PV_PIN_LCD_D2=11
+CONFIG_PV_PIN_LCD_D3=6
+CONFIG_PV_PIN_LCD_RST=5
+CONFIG_PV_PIN_LCD_BL=16
+CONFIG_PV_PIN_TOUCH_SDA=15
+CONFIG_PV_PIN_TOUCH_SCL=14
+CONFIG_PV_PIN_TOUCH_RST=12
+CONFIG_PV_PIN_TOUCH_INT=13
+
+# PSRAM holds the per-frame reassembly buffer (up to ~260KB for a 360x360 panel).
+CONFIG_SPIRAM=y
+CONFIG_SPIRAM_SPEED_200M=y
+
+# --- Haptics: DRV2605L driving a 3V / 80mA ERM ---
+# ERM (not LRA): clears N_ERM_LRA feedback; the chip's CONTROL3 power-on default
+# (0xA0) already runs ERM open-loop, so no back-EMF auto-calibration is needed.
+# Library 2 (B) is the 3V ERM ROM (library 6 is LRA-only). OD_CLAMP=3000mV clamps
+# the open-loop drive to ~3V so effects don't overdrive the motor; RATED_VOLTAGE
+# is a closed-loop back-EMF target and is unused open-loop, so it stays at 0.
+CONFIG_PV_HAPTICS_ENABLE=y
+# CONFIG_PV_HAPTICS_LRA is not set
+CONFIG_PV_HAPTICS_LIBRARY=2
+CONFIG_PV_HAPTICS_RATED_MV=0
+CONFIG_PV_HAPTICS_CLAMP_MV=3000
+
+# --- Signed OTA + factory recovery flash layout (see partitions.csv) ---
+# Two 2MB app slots (ota_0/ota_1) + a 1MB factory recovery app + a ~2.875MB
+# `assets` partition for the idle-face pack. The app is updated over the
+# vendor-bulk USB link (no JTAG on the product board).
+CONFIG_PARTITION_TABLE_CUSTOM=y
+CONFIG_PARTITION_TABLE_CUSTOM_FILENAME="partitions.csv"
+
+# --- Idle facial animation (main/face.c, esp_emote_expression) ---
+# The mmap file-name length must be long enough for the asset pack's file names
+# (e.g. font_puhui_common_20_4.bin) AND must match the length the pack is built
+# with (see build_speaker_assets_bin in the top-level CMakeLists.txt), or runtime
+# name lookups fail. 16 (the default) truncates; 32 is the packer default.
+CONFIG_MMAP_FILE_NAME_LENGTH=32
+
+# Roll back to the previous slot if a freshly-flashed app fails to confirm itself
+# (it calls esp_ota_mark_app_valid_cancel_rollback() only after a successful USB
+# handshake -- see ota.c). Required for the anti-brick guarantees.
+CONFIG_BOOTLOADER_APP_ROLLBACK_ENABLE=y
+
+# --- Open firmware: no image signing, no Secure Boot ---
+# This is open hardware -- you are meant to build and flash your own firmware,
+# so the default build requires NO keys and enables NO firmware lock-in. OTA
+# integrity is enforced by a whole-image SHA-256 the host announces and the
+# device verifies (see main/ota.c); authenticity of the running firmware is
+# deliberately NOT enforced (that would prevent forks).
+#
+# Do NOT add CONFIG_SECURE_BOOT / CONFIG_SECURE_SIGNED_APPS_* here: burning
+# Secure Boot is a one-way door that permanently ties a unit to one signing key
+# and ends its ability to run forks. If you maintain locked units, keep that
+# config in a private overlay, never in this public default.
+
+# --- Device-identity attestation (main/auth.c) ---
+# Sign AUTH_CHALLENGE nonces with the per-device ECDSA P-256 key in eFuse; the
+# key is read-protected and only ever used by the ECDSA peripheral. (The
+# ECDSA_SIGN masking/constant-time countermeasure options are ESP32-H2-only.)
+# Harmless on an unprovisioned board: with no key burned, auth.c reports
+# unprovisioned and the host drives the panel unverified.
+CONFIG_MBEDTLS_HARDWARE_ECDSA_SIGN=y
+CONFIG_MBEDTLS_HARDWARE_ECDSA_VERIFY=y
+
+# --- TinyUSB: vendor (WinUSB/WCID) class only, no CDC. USB-HS on the P4. ---
+CONFIG_TINYUSB_VENDOR_COUNT=1
+# (TINYUSB_CDC_COUNT is now gated on TINYUSB_CDC_ENABLED, which we leave off, so
+# it must not be set here -- CDC stays disabled by default.)
+# Roomy FIFOs so a burst of bulk-OUT packets is not throttled by the class FIFO.
+CONFIG_TINYUSB_VENDOR_RX_BUFSIZE=8192
+CONFIG_TINYUSB_VENDOR_TX_BUFSIZE=2048
+# Deliver suspend/resume device events so the backlight can follow USB power.
+CONFIG_TINYUSB_SUSPEND_CALLBACK=y
+CONFIG_TINYUSB_RESUME_CALLBACK=y
+
+# Keep the IDF console on UART; the USB peripheral is ours.
+CONFIG_ESP_CONSOLE_UART_DEFAULT=y
+
+# Slightly larger main task stack: panel init + USB install run there.
+CONFIG_ESP_MAIN_TASK_STACK_SIZE=6144
+
+# Give the Task WDT teeth: rx_task is subscribed to it as the backstop for a
+# wedge outside the panel-fault path (see recover_panel in main.c). Without
+# PANIC the WDT only prints a warning and the chip never reboots, so a wedged
+# rx_task leaves the USB stack enumerable but permanently unable to answer HELLO
+# -- the host then bus-resets the device every ~11s with no recovery. Panicking
+# reboots it; it re-enumerates in ~1s and the host reconnects.
+CONFIG_ESP_TASK_WDT_PANIC=y
+
+CONFIG_FREERTOS_HZ=1000
+
+

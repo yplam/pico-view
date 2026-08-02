@@ -1,0 +1,165 @@
+menu "pico-view firmware configuration"
+
+    comment "Default GPIOs are placeholders for the ESP32-P4-Function-EV-Board."
+    comment "Set them to match how your SPI panel + I2C touch are actually wired."
+
+    menu "Panel QSPI wiring"
+        comment "ST77916 360x360 driven over QSPI (4 data lines, no D/C line)."
+
+        config PV_LCD_LDO_CHAN
+            int "Panel power LDO channel (LDO_VOx, 0 = powered externally)"
+            default 4
+            range 0 4
+            help
+                Internal ESP32-P4 LDO channel used to supply the panel VCC
+                rail. LDO_VO4 (channel 4) feeds the LCD 3V3 supply on the
+                reference board. The internal LDO can source the panel's
+                ~200mA load; current is a hardware property and is not
+                configurable in software. Set to 0 if the panel is powered
+                from an external regulator.
+
+        config PV_LCD_LDO_VOLTAGE_MV
+            int "Panel power LDO voltage (mV)"
+            default 3300
+            depends on PV_LCD_LDO_CHAN != 0
+            help
+                Output voltage for the panel power LDO channel, e.g. 3300 for
+                a 3.3V panel supply.
+
+        config PV_LCD_SPI_HOST
+            int "SPI host (2 = SPI2/FSPI)"
+            default 2
+            range 1 2
+
+        config PV_LCD_PCLK_HZ
+            int "QSPI clock (Hz)"
+            default 40000000
+            help
+                ST77916 over QSPI runs comfortably at 40-80 MHz. Start at 40 MHz
+                and raise it once the panel is verified.
+
+        config PV_PIN_LCD_SCLK
+            int "LCD SCLK (PCLK) GPIO"
+            default 9
+        config PV_PIN_LCD_CS
+            int "LCD CS GPIO"
+            default 7
+        config PV_PIN_LCD_D0
+            int "LCD D0 (SDIO0) GPIO"
+            default 8
+        config PV_PIN_LCD_D1
+            int "LCD D1 (SDIO1) GPIO"
+            default 10
+        config PV_PIN_LCD_D2
+            int "LCD D2 (SDIO2) GPIO"
+            default 11
+        config PV_PIN_LCD_D3
+            int "LCD D3 (SDIO3) GPIO"
+            default 6
+        config PV_PIN_LCD_RST
+            int "LCD RST GPIO"
+            default 5
+        config PV_PIN_LCD_BL
+            int "LCD backlight GPIO (-1 to disable)"
+            default 4
+        config PV_LCD_BL_ON_LEVEL
+            int "Backlight active level (0 or 1)"
+            default 1
+            range 0 1
+            help
+                Electrical level that turns the backlight ON. The LEDC PWM duty
+                is inverted for active-low panels (0), so brightness 0..255 maps
+                to dark..full regardless of this setting.
+        config PV_LCD_BL_PWM_FREQ_HZ
+            int "Backlight PWM frequency (Hz)"
+            default 25000
+            help
+                LEDC timer frequency driving the backlight. ~5 kHz is above the
+                audible range and high enough to avoid visible flicker while
+                staying within the timer's resolution budget.
+        config PV_LCD_BL_PWM_RES_BITS
+            int "Backlight PWM duty resolution (bits)"
+            default 8
+            range 4 12
+            help
+                LEDC duty resolution. 8 bits matches the host's 0..255 brightness
+                range 1:1. freq_hz * 2^res must stay within the LEDC clock.
+    endmenu
+
+    menu "Touch I2C wiring"
+        comment "SDA/SCL/port below define the shared expansion I2C bus, used by"
+        comment "both CST816 touch and (if enabled) the DRV2605L haptic driver."
+        config PV_TOUCH_ENABLE
+            bool "Enable CST816 capacitive touch"
+            default y
+        config PV_TOUCH_I2C_PORT
+            int "Expansion I2C port number"
+            default 0
+            range 0 1
+            depends on PV_TOUCH_ENABLE || PV_HAPTICS_ENABLE
+        config PV_PIN_TOUCH_SDA
+            int "Expansion I2C SDA GPIO"
+            default 15
+            depends on PV_TOUCH_ENABLE || PV_HAPTICS_ENABLE
+        config PV_PIN_TOUCH_SCL
+            int "Expansion I2C SCL GPIO"
+            default 14
+            depends on PV_TOUCH_ENABLE || PV_HAPTICS_ENABLE
+        config PV_PIN_TOUCH_RST
+            int "Touch RST GPIO (-1 to disable)"
+            default 12
+            depends on PV_TOUCH_ENABLE
+        config PV_PIN_TOUCH_INT
+            int "Touch INT GPIO (-1 to poll only)"
+            default 13
+            depends on PV_TOUCH_ENABLE
+        config PV_TOUCH_I2C_HZ
+            int "Touch I2C clock (Hz)"
+            default 400000
+            depends on PV_TOUCH_ENABLE
+    endmenu
+
+    menu "Haptics (DRV2605L)"
+        comment "DRV2605L LRA driver on the shared expansion I2C bus (SDA/SCL/port"
+        comment "are set in 'Touch I2C wiring'). EN is assumed tied high."
+        config PV_HAPTICS_ENABLE
+            bool "Enable DRV2605L haptic driver"
+            default n
+        config PV_HAPTICS_I2C_ADDR
+            hex "DRV2605L 7-bit I2C address"
+            default 0x5A
+            depends on PV_HAPTICS_ENABLE
+        config PV_HAPTICS_I2C_HZ
+            int "Haptics I2C clock (Hz)"
+            default 400000
+            depends on PV_HAPTICS_ENABLE
+        config PV_HAPTICS_LRA
+            bool "Actuator is an LRA (unset for ERM)"
+            default y
+            depends on PV_HAPTICS_ENABLE
+        config PV_HAPTICS_LIBRARY
+            int "ROM waveform library (1-5 ERM, 6 LRA)"
+            default 6
+            range 1 7
+            depends on PV_HAPTICS_ENABLE
+            help
+                DRV2605L effect ROM library the sequencer plays from. Library 6
+                is the LRA library; 1-5 are ERM libraries A-E. The host can
+                override this per-effect via the Haptics message.
+        config PV_HAPTICS_RATED_MV
+            int "LRA rated RMS voltage (mV, 0 = leave chip default)"
+            default 0
+            depends on PV_HAPTICS_ENABLE
+            help
+                Sets the DRV2605L RATED_VOLTAGE register. 0 keeps the power-on
+                default. Consult your actuator's datasheet for the rated voltage.
+        config PV_HAPTICS_CLAMP_MV
+            int "LRA overdrive clamp voltage (mV, 0 = leave chip default)"
+            default 0
+            depends on PV_HAPTICS_ENABLE
+            help
+                Sets the DRV2605L OD_CLAMP register (open-loop peak drive). 0
+                keeps the power-on default.
+    endmenu
+
+endmenu

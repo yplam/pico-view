@@ -1,0 +1,17 @@
+## Managed component dependencies.
+##
+## TinyUSB drives the USB link; the panel is driven through core esp_lcd panel-IO
+## and touch is read over the core I2C master driver, so the panel/touch init
+## stays hand-ported from the host engine (driver.rs / touch.rs).
+##
+## esp_emote_expression is the standalone facial-animation engine (the emote_*
+## C API; it does NOT depend on the Brookesia service framework). It transitively
+## pulls the gfx renderer (esp_emote_gfx -> LVGL, freetype, jpeg, heatshrink), the
+## prebuilt face pack (esp_emote_assets), and the mmap asset packer. It renders the
+## idle "face" shown on the panel when no USB host is driving frames (see face.c).
+dependencies:
+  idf: ">=5.5"
+  espressif/esp_tinyusb:
+    version: "^2.0.0"
+  espressif2022/esp_emote_expression:
+    version: "~1.0.2"
